@@ -22,12 +22,13 @@ img{max-width:100%}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <style>
-/* Layout: calm phone-first app. Home = one question + one search box. Results = one summary line, one price card, simple rows (site · price · Open). Bottom tabs on phones, top tabs on desktop. */
+/* Layout: calm phone-first app. Four tabs (Search, Check, Alerts, Flip), one job per screen, bottom tabs on phones, top tabs on desktop. */
 :root{
-  /* Colour roles: navy = trust, blue = action, green = money saved, gold = Pro only */
+  /* Colour roles: navy = trust, blue = action, green = money saved, amber = careful, gold = Pro only */
   --bg:#F6F7F9; --surface:#FFFFFF; --soft:#EEF1F5; --ink:#0F1B2D; --ink-2:#344257; --muted:#67758A; --line:#E3E7EE;
   --blue:#1D5BF2; --blue-soft:#E8EFFE; --blue-ink:#1645B8; --on-blue:#FFFFFF;
   --green:#0E9F63; --green-soft:#E2F5EC; --green-ink:#076B42;
+  --amber:#C26A00; --amber-soft:#FFF0DC; --amber-ink:#7A4300;
   --gold:#F2B705; --gold-soft:#FFF4D1; --gold-ink:#6B4E00;
   --scrim:rgba(15,27,45,.45); --shadow:0 1px 2px rgba(15,27,45,.04),0 8px 24px -14px rgba(15,27,45,.22);
   --font:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -37,6 +38,7 @@ img{max-width:100%}
     --bg:#0A1019; --surface:#111A26; --soft:#18222F; --ink:#E9EEF5; --ink-2:#C5CEDA; --muted:#8C99AC; --line:#1E2938;
     --blue:#5C8DFF; --blue-soft:#16233F; --blue-ink:#A9C2FF; --on-blue:#0A1019;
     --green:#38CF8C; --green-soft:#10301F; --green-ink:#8DEBBE;
+    --amber:#F0A040; --amber-soft:#3A2710; --amber-ink:#F7C98A;
     --gold:#F7C744; --gold-soft:#33290B; --gold-ink:#F7D77A;
     --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.8); color-scheme:dark;
   }
@@ -45,6 +47,7 @@ img{max-width:100%}
   --bg:#0A1019; --surface:#111A26; --soft:#18222F; --ink:#E9EEF5; --ink-2:#C5CEDA; --muted:#8C99AC; --line:#1E2938;
   --blue:#5C8DFF; --blue-soft:#16233F; --blue-ink:#A9C2FF; --on-blue:#0A1019;
   --green:#38CF8C; --green-soft:#10301F; --green-ink:#8DEBBE;
+  --amber:#F0A040; --amber-soft:#3A2710; --amber-ink:#F7C98A;
   --gold:#F7C744; --gold-soft:#33290B; --gold-ink:#F7D77A;
   --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.8); color-scheme:dark;
 }
@@ -71,8 +74,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))}
 .view{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 
-/* home */
-.home h1{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em;margin:28px 0 4px;text-wrap:balance}
+/* shared bits */
+h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em;margin:24px 0 0;text-wrap:balance}
+.sub{margin:-8px 0 0;color:var(--muted)}
+.quiet{margin:0;font-size:.88rem;color:var(--muted)}
+.quiet b{color:var(--ink)}
 .search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:6px 6px 6px 14px;box-shadow:var(--shadow)}
 .search:focus-within{border-color:var(--blue)}
 .search > svg{color:var(--muted)}
@@ -81,12 +87,29 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .btn{border:0;border-radius:12px;padding:12px 18px;font:800 .95rem var(--font);cursor:pointer;white-space:nowrap}
 .btn-blue{background:var(--blue);color:var(--on-blue)}
 .btn-soft{background:var(--soft);color:var(--ink)}
+.btn-wide{width:100%;padding-block:14px}
 .examples{display:flex;flex-wrap:wrap;gap:8px}
 .ex{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 14px;font:700 .9rem var(--font);cursor:pointer}
-.quiet{margin:0;font-size:.88rem;color:var(--muted)}
-.quiet b{color:var(--ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:12px}
+.label{font-size:.82rem;font-weight:800;color:var(--muted);margin:0}
+.field{display:grid;gap:8px}
+.inp{width:100%;min-width:0;font:600 1rem var(--font);color:var(--ink);background:var(--soft);border:1.5px solid transparent;border-radius:12px;padding:12px}
+.inp:focus{border-color:var(--blue);outline:none}
+.inp::placeholder{color:var(--muted);font-weight:500}
+.money{position:relative;flex:1;min-width:0;display:block}
+.money > span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:800;pointer-events:none}
+.money .inp{padding-left:28px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:8px 13px;font:700 .86rem var(--font);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.err{margin:0;font-size:.85rem;color:var(--ink);background:var(--amber-soft);padding:8px 10px;border-radius:10px}
+.linkbtn{background:none;border:0;color:var(--blue-ink);font:800 .9rem var(--font);cursor:pointer;padding:4px 0;text-align:left}
+.empty{padding:22px 16px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:16px;margin:0}
+.x{border:0;background:var(--soft);color:var(--ink);width:32px;height:32px;border-radius:50%;font-size:1.05rem;line-height:1;cursor:pointer;flex:none}
+.note{margin:0;font-size:.82rem;color:var(--ink-2);background:var(--soft);padding:10px 12px;border-radius:12px}
 
-/* results */
+/* search results */
 .sumline{display:flex;align-items:center;gap:8px}
 .sumline .txt{flex:1;min-width:0;font-size:.9rem;font-weight:700;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chipbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;font:800 .85rem var(--font);cursor:pointer;flex:none}
@@ -94,9 +117,10 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
 .iconbtn svg.i{width:17px;height:17px}
 .typical{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--green-soft);color:var(--green-ink);border-radius:16px;padding:14px 16px}
+.typical > div{min-width:0}
 .typical small{display:block;font-size:.78rem;font-weight:700;opacity:.85}
 .typical b{font:800 1.5rem/1.15 var(--font);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.typical .sub{display:block;font-size:.8rem;font-weight:600;margin-top:2px}
+.typical .s{display:block;font-size:.8rem;font-weight:600;margin-top:2px}
 .typical a{flex:none;color:var(--green-ink);font-weight:800;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .typical a svg.i{width:15px;height:15px}
 .typical.plain{background:var(--soft);color:var(--ink-2)}
@@ -115,7 +139,7 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .rs-price small{font-size:.68rem;font-weight:700;color:var(--muted)}
 .rs.top .rs-price b{color:var(--green)}
 .rs-price i{display:block;width:54px;height:14px;border-radius:5px;background:linear-gradient(90deg,var(--soft),var(--line),var(--soft));background-size:200% 100%}
-.open{display:inline-flex;align-items:center;gap:4px;background:var(--blue-soft);color:var(--blue-ink);border-radius:11px;padding:10px 12px;font:800 .88rem var(--font);text-decoration:none;white-space:nowrap}
+.open{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--blue-soft);color:var(--blue-ink);border-radius:11px;padding:10px 12px;font:800 .88rem var(--font);text-decoration:none;white-space:nowrap}
 .open svg.i{width:15px;height:15px}
 .rs.top .open{background:var(--blue);color:var(--on-blue)}
 .linkrow{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:16px;padding:14px 16px;font:700 .95rem var(--font);cursor:pointer;text-align:left}
@@ -124,36 +148,41 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .linkrow .chev{color:var(--muted)}
 .fine{margin:0;font-size:.78rem;color:var(--muted);text-align:center}
 
-/* other views */
-.vhead h1{font:800 clamp(1.6rem,7vw,2.1rem)/1.15 var(--font);letter-spacing:-.03em;margin:20px 0 0}
-.vhead p{margin:6px 0 0;color:var(--muted)}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:10px}
-.inp{width:100%;min-width:0;font:600 1rem var(--font);color:var(--ink);background:var(--soft);border:1.5px solid transparent;border-radius:12px;padding:12px}
-.inp:focus{border-color:var(--blue);outline:none}
-.inp::placeholder{color:var(--muted);font-weight:500}
-.money{position:relative;flex:1;min-width:0;display:block}
-.money > span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:800;pointer-events:none}
-.money .inp{padding-left:28px}
-.two{display:grid;grid-template-columns:minmax(0,1fr) 116px;gap:8px}
-.err{margin:0;font-size:.85rem;color:var(--ink);background:var(--gold-soft);padding:8px 10px;border-radius:10px}
+/* price check verdict */
+.verdict{border-radius:18px;padding:18px;display:grid;gap:8px;background:var(--surface);border:1px solid var(--line)}
+.vpill{justify-self:start;font-weight:800;font-size:.9rem;padding:6px 12px;border-radius:999px}
+.v-good{background:var(--green-soft);color:var(--green-ink)}
+.v-fair{background:var(--blue-soft);color:var(--blue-ink)}
+.v-high,.v-sus{background:var(--amber-soft);color:var(--amber-ink)}
+.v-none{background:var(--soft);color:var(--ink-2)}
+.verdict .big{font:800 1.6rem/1.15 var(--font);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.verdict p{margin:0;color:var(--ink-2)}
+.verdict .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.verdict .acts a,.verdict .acts button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;font:800 .85rem var(--font);text-decoration:none;cursor:pointer}
+.verdict .acts svg.i{width:15px;height:15px}
+
+/* alerts */
 .list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.lot,.sv{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
-.lot.ex{border-style:dashed;background:transparent}
-.lot-price{flex:none;min-width:64px;font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums}
-.lot.best .lot-price{color:var(--green)}
+.al{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.al .bell{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue-ink);flex:none}
 .grow{min-width:0;flex:1;display:grid}
-.grow b{font-weight:800;font-size:.93rem;overflow-wrap:anywhere}
+.grow b{font-weight:800;font-size:.95rem;overflow-wrap:anywhere}
 .grow span{font-size:.78rem;color:var(--muted);font-weight:600}
-.lot a{font-weight:800;font-size:.85rem;color:var(--blue-ink);text-decoration:none}
-.x{border:0;background:var(--soft);color:var(--ink);width:32px;height:32px;border-radius:50%;font-size:1.05rem;line-height:1;cursor:pointer;flex:none}
-.board-sum{margin:0;font-weight:800;font-size:.95rem}
-.empty{padding:26px 16px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:16px}
+.al .btn{padding:9px 13px;font-size:.85rem}
+
+/* flip */
+.result{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:2px}
+.stat small{font-size:.75rem;font-weight:700;color:var(--muted)}
+.stat b{font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat.main{grid-column:1 / -1;padding:16px}
+.stat.main b{font-size:2rem;letter-spacing:-.02em}
+.pos{color:var(--green)} .neg{color:var(--amber)}
 
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(6px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(8px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;grid-template-columns:repeat(3,1fr)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(6px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(8px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;grid-template-columns:repeat(4,1fr)}
 .tab{display:grid;justify-items:center;gap:2px;background:none;border:0;color:var(--muted);font:700 .72rem var(--font);padding:6px 0;cursor:pointer}
 .tab[aria-current="page"]{color:var(--blue)}
-.tab .lock{font-size:.62rem;color:var(--gold-ink)}
 
 /* sheets */
 .sheet-wrap{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
@@ -162,16 +191,9 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);justify-self:center}
 .sheet-head{display:flex;justify-content:space-between;align-items:center}
 .sheet h2{font:800 1.2rem var(--font);margin:0;letter-spacing:-.02em}
-.label{font-size:.82rem;font-weight:800;color:var(--muted);margin:0}
-.field{display:grid;gap:8px}
-.pair{display:flex;gap:8px;align-items:center}
-.pills{display:flex;flex-wrap:wrap;gap:6px}
-.pill{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:8px 13px;font:700 .86rem var(--font);cursor:pointer}
-.pill[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:12px;padding:4px;gap:4px}
 .seg button{border:0;background:transparent;border-radius:9px;padding:10px;font:800 .9rem var(--font);color:var(--muted);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
-.sheet .btn{width:100%;padding-block:14px}
 .checks{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .checks li{display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:.95rem}
 .checks .tick{width:24px;height:24px;border-radius:8px;background:var(--green-soft);color:var(--green-ink);display:grid;place-items:center}
@@ -193,10 +215,19 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
 .plan span{font-size:.88rem;color:var(--ink-2);font-weight:600}
 .plan em{position:absolute;top:-10px;right:10px;font-style:normal;background:var(--green);color:var(--surface);font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px}
 .plan[aria-checked="true"]{border-color:var(--blue);background:var(--blue-soft)}
-.center{text-align:center;margin:0}
 .demo{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
 .link{background:none;border:0;color:var(--muted);font:700 .9rem var(--font);cursor:pointer;justify-self:center;padding:6px}
-.toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:50;white-space:nowrap}
+
+/* onboarding */
+.onboard{position:fixed;inset:0;z-index:60;background:var(--bg);overflow:auto;padding:calc(24px + max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px))) max(20px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(24px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(20px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)))}
+.onboard .wrap{max-width:440px;margin:0 auto;display:grid;gap:16px;min-height:100%;align-content:center}
+.onboard h1{font:800 clamp(1.8rem,8vw,2.4rem)/1.1 var(--font);letter-spacing:-.035em;margin:12px 0 0}
+.choice{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:20px;padding:18px;cursor:pointer;box-shadow:var(--shadow)}
+.choice .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none}
+.choice .ic svg.i{width:24px;height:24px}
+.choice b{display:block;font-size:1.1rem;font-weight:800}
+.choice span{color:var(--muted);font-size:.92rem}
+.toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:70;white-space:nowrap}
 
 @media (prefers-reduced-motion:no-preference){
   .shim,.rs-price i{animation:sh 1.4s linear infinite}
@@ -212,19 +243,18 @@ main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--saf
   .sheet{border-radius:24px;padding:22px 24px 24px}
   .grab{display:none}
   .toast{bottom:28px}
-  .home h1{margin-top:48px}
+  h1.q{margin-top:44px}
 }
 @media (max-width:370px){
   .rs{grid-template-columns:36px minmax(0,1fr) auto;gap:10px}
   .mono{width:36px;height:36px}
-  .rs .open{grid-column:2 / -1;justify-content:center}
+  .rs .open{grid-column:2 / -1}
+  .result{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-
 /* app feel */
 html,body{overscroll-behavior-y:none}
 *{-webkit-tap-highlight-color:transparent}
-button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.rows,.list,.examples{max-width:100%}
+button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -232,11 +262,13 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
   <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4h8.5l8.5 8.5-8 8z"/><circle cx="8" cy="8.5" r="1.4"/></symbol>
-  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-5.5-3.8-5.5 3.8z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2 19.5 6v6c0 4.4-3.2 8-7.5 8.8C7.7 20 4.5 16.4 4.5 12V6z"/><path d="m9 12 2.1 2.1L15.2 10"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M5 8h14M7 8l-3 6a3 3 0 0 0 6 0zM17 8l-3 6a3 3 0 0 0 6 0z"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3.5 17 9 11.5l4 4L20.5 8"/><path d="M15 8h5.5v5.5"/></symbol>
 </svg>
 
 <header class="bar">
@@ -244,68 +276,93 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
     <button class="logo" type="button" id="logo"><span class="logo-tag" aria-hidden="true"></span>ALL FOR ONE</button>
     <nav class="topnav" aria-label="Sections">
       <button type="button" data-tab="search">Search</button>
-      <button type="button" data-tab="board">Price board</button>
-      <button type="button" data-tab="saved">Saved</button>
+      <button type="button" data-tab="check">Price check</button>
+      <button type="button" data-tab="alerts">Alerts</button>
+      <button type="button" data-tab="flip">Flip</button>
     </nav>
     <button class="pro-btn" type="button" id="pro-btn"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span>Go Pro</span></button>
   </div>
 </header>
 
 <main class="in">
+  <!-- SEARCH -->
   <section class="view" data-view="search">
-    <div class="home" id="home-title"><h1>What are you looking for?</h1></div>
+    <h1 class="q" id="search-title">What are you looking for?</h1>
     <form class="search" id="search-form" role="search" autocomplete="off">
       <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
       <input id="q" type="search" enterkeyhint="search" placeholder="e.g. PS5 under £300" aria-label="What are you looking for?">
       <button class="btn btn-blue" type="submit">Search</button>
     </form>
-
-    <div class="home view" id="home-extra">
+    <div class="view" id="home-extra">
       <div class="examples" id="examples"></div>
       <p class="quiet">One search. Every site: eBay, Vinted, Facebook, Gumtree and more.</p>
       <p class="quiet" id="free-left"></p>
+      <button class="linkbtn" type="button" id="mode-line"></button>
     </div>
-
     <div class="view" id="results" hidden>
       <div class="sumline">
         <span class="txt" id="sum"></span>
         <button class="chipbtn" type="button" id="filters-btn"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg>Filters</button>
-        <button class="iconbtn" type="button" id="save-btn" aria-label="Save this search"><svg class="i" aria-hidden="true"><use href="#i-bookmark"/></svg></button>
+        <button class="iconbtn" type="button" id="alert-btn" aria-label="Alert me when one is listed"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg></button>
       </div>
       <div class="typical" id="typical"></div>
+      <button class="linkrow" type="button" id="flipit-btn" hidden><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg><span>Work out the profit if you flip it</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
       <ul class="rows" id="rows"></ul>
       <button class="linkrow" type="button" id="tips-btn"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span>Before you pay: 4 quick checks</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
-      <p class="fine">“est.” = AI estimate. Tap Open for real, live prices.</p>
+      <p class="fine">“est.” = estimated typical price. Tap Open for real, live prices.</p>
     </div>
   </section>
 
-  <section class="view" data-view="board" hidden>
-    <div class="vhead"><h1>Price board</h1><p>Paste listings you like. Cheapest goes to the top.</p></div>
-    <form class="panel" id="add-form" autocomplete="off">
-      <input class="inp" id="lot-url" type="url" placeholder="Paste listing link" aria-label="Listing link">
-      <div class="two">
-        <input class="inp" id="lot-title" placeholder="Name (optional)" aria-label="Name">
-        <label class="money"><span>£</span><input class="inp" id="lot-price" inputmode="decimal" placeholder="Price" aria-label="Price in pounds"></label>
-      </div>
-      <button class="btn btn-blue" type="submit">Add</button>
-      <p class="err" id="lot-err" hidden></p>
+  <!-- PRICE CHECK -->
+  <section class="view" data-view="check" hidden>
+    <h1 class="q">Is it a good deal?</h1>
+    <p class="sub">Paste a listing, or type what it is.</p>
+    <form class="panel" id="check-form" autocomplete="off">
+      <input class="inp" id="c-url" type="url" placeholder="Paste listing link (optional)" aria-label="Listing link">
+      <input class="inp" id="c-item" placeholder="What is it? e.g. iPhone 13 128GB" aria-label="What is it?">
+      <label class="money"><span>£</span><input class="inp" id="c-price" inputmode="decimal" placeholder="Asking price" aria-label="Asking price in pounds"></label>
+      <button class="btn btn-blue btn-wide" type="submit">Check it</button>
+      <p class="err" id="c-err" hidden></p>
+      <p class="quiet" id="checks-left"></p>
     </form>
-    <p class="board-sum" id="board-sum"></p>
-    <ul class="list" id="board"></ul>
-    <button class="link" type="button" id="clear-btn" hidden>Clear board</button>
-    <div class="pair" id="clear-confirm" hidden style="justify-content:center"><span class="quiet">Remove everything?</span><button class="btn btn-soft" type="button" id="clear-yes">Remove</button><button class="link" type="button" id="clear-no">Keep</button></div>
+    <div id="verdict"></div>
   </section>
 
-  <section class="view" data-view="saved" hidden>
-    <div class="vhead"><h1>Saved</h1><p>Tap one to search again.</p></div>
-    <ul class="list" id="saved"></ul>
+  <!-- ALERTS -->
+  <section class="view" data-view="alerts" hidden>
+    <h1 class="q">Deal alerts</h1>
+    <p class="sub">Tell us what you want and your max price.</p>
+    <button class="btn btn-blue btn-wide" type="button" id="new-alert">New alert</button>
+    <ul class="list" id="alerts"></ul>
+    <p class="note">Phone notifications switch on in the next update. For now, tap Check to see the newest listings first.</p>
+  </section>
+
+  <!-- FLIP -->
+  <section class="view" data-view="flip" hidden>
+    <h1 class="q">Will it flip?</h1>
+    <p class="sub">See your profit after fees before you buy.</p>
+    <div class="panel">
+      <input class="inp" id="f-item" placeholder="Item (optional)" aria-label="Item">
+      <div class="pair">
+        <div class="field"><p class="label">You buy for</p><label class="money"><span>£</span><input class="inp" id="f-buy" inputmode="decimal" placeholder="0" aria-label="Buy price"></label></div>
+        <div class="field"><p class="label">You sell for</p><label class="money"><span>£</span><input class="inp" id="f-sell" inputmode="decimal" placeholder="0" aria-label="Sell price"></label></div>
+      </div>
+      <div class="field"><p class="label">Selling on</p><div class="pills" id="f-plat"></div></div>
+      <div class="pair">
+        <div class="field"><p class="label">Postage you pay</p><label class="money"><span>£</span><input class="inp" id="f-post" inputmode="decimal" placeholder="0" aria-label="Postage"></label></div>
+        <div class="field"><p class="label">Other costs</p><label class="money"><span>£</span><input class="inp" id="f-other" inputmode="decimal" placeholder="0" aria-label="Other costs"></label></div>
+      </div>
+    </div>
+    <div class="result" id="f-result"></div>
+    <p class="note" id="f-note"></p>
   </section>
 </main>
 
 <nav class="tabbar" aria-label="Sections">
   <button class="tab" type="button" data-tab="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>Search</button>
-  <button class="tab" type="button" data-tab="board"><svg class="i" aria-hidden="true"><use href="#i-tag"/></svg>Board</button>
-  <button class="tab" type="button" data-tab="saved"><svg class="i" aria-hidden="true"><use href="#i-bookmark"/></svg>Saved</button>
+  <button class="tab" type="button" data-tab="check"><svg class="i" aria-hidden="true"><use href="#i-scale"/></svg>Check</button>
+  <button class="tab" type="button" data-tab="alerts"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>Alerts</button>
+  <button class="tab" type="button" data-tab="flip"><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg>Flip</button>
 </nav>
 
 <!-- Filters -->
@@ -331,8 +388,24 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
       <p class="label">Show first</p>
       <div class="seg" id="sort-seg"><button type="button" data-sort="cheap">Cheapest</button><button type="button" data-sort="new">Newest</button></div>
     </div>
-    <button class="btn btn-blue" type="button" data-close>Show results</button>
+    <button class="btn btn-blue btn-wide" type="button" data-close>Show results</button>
   </div>
+</div>
+
+<!-- New alert -->
+<div class="sheet-wrap" id="sheet-alert" hidden>
+  <div class="scrim" data-close></div>
+  <form class="sheet" role="dialog" aria-modal="true" aria-labelledby="a-title" id="alert-form" autocomplete="off">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="sheet-head"><h2 id="a-title">New alert</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+    <div class="field"><p class="label">What do you want?</p><input class="inp" id="a-item" placeholder="e.g. Nike Dunk Low size 9" aria-label="Item"></div>
+    <div class="pair">
+      <div class="field"><p class="label">Max price</p><label class="money"><span>£</span><input class="inp" id="a-max" inputmode="numeric" placeholder="Any" aria-label="Max price"></label></div>
+      <div class="field"><p class="label">Near</p><input class="inp" id="a-loc" placeholder="Anywhere" aria-label="Town or postcode"></div>
+    </div>
+    <p class="err" id="a-err" hidden></p>
+    <button class="btn btn-blue btn-wide" type="submit">Save alert</button>
+  </form>
 </div>
 
 <!-- Tips -->
@@ -342,7 +415,7 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
     <div class="grab" aria-hidden="true"></div>
     <div class="sheet-head"><h2 id="t-title">Before you pay</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
     <ul class="checks" id="checks"></ul>
-    <button class="btn btn-soft" type="button" data-close>Got it</button>
+    <button class="btn btn-soft btn-wide" type="button" data-close>Got it</button>
   </div>
 </div>
 
@@ -352,23 +425,39 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-title" id="pro-body"></div>
 </div>
 
+<!-- First open -->
+<div class="onboard" id="onboard" hidden>
+  <div class="wrap">
+    <div class="logo" aria-hidden="true"><span class="logo-tag"></span>ALL FOR ONE</div>
+    <h1>What brings you here?</h1>
+    <button class="choice" type="button" data-mode="shop"><span class="ic" style="background:var(--green-soft);color:var(--green-ink)"><svg class="i" aria-hidden="true"><use href="#i-tag"/></svg></span><span><b>Find bargains</b><span>Pay less for things you want</span></span></button>
+    <button class="choice" type="button" data-mode="flip"><span class="ic" style="background:var(--blue-soft);color:var(--blue-ink)"><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg></span><span><b>Flip for profit</b><span>Buy low, sell high</span></span></button>
+    <p class="quiet" style="text-align:center">You can change this any time.</p>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (() => {
+  /* Set this to the live price service once it's deployed, e.g. 'https://allforone-app.vercel.app' */
+  const API_URL = '';
+
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const store = {
-    get(k, d) { try { const v = localStorage.getItem('rummage.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem('rummage.' + k, JSON.stringify(v)); } catch (e) {} }
+    get(k, d) { try { const v = localStorage.getItem('afo.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('afo.' + k, JSON.stringify(v)); } catch (e) {} }
   };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = id => `<svg class="i" aria-hidden="true"><use href="#i-${id}"/></svg>`;
   const PC_FULL = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i, PC_OUT = /^[A-Z]{1,2}\d[A-Z\d]?$/i;
   const isPostcode = v => !!v && (PC_FULL.test(v.trim()) || PC_OUT.test(v.trim()));
   const pc = v => v.replace(/\s+/g, '').toUpperCase();
-  const gbp = n => '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  const gbp = n => (n < 0 ? '-£' : '£') + Math.abs(Number(n)).toLocaleString('en-GB', { minimumFractionDigits: Math.abs(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });
   const rangeTxt = r => r[0] === r[1] ? gbp(r[0]) : gbp(r[0]) + '–' + Number(r[1]).toLocaleString('en-GB');
+  const num = v => { const n = parseFloat(String(v || '').replace(/[^\d.]/g, '')); return isFinite(n) ? n : 0; };
+  const cleanNum = v => { const n = num(v); return n > 0 ? String(Math.round(n)) : ''; };
 
   /* ---------- sites ---------- */
   const SITES = {
@@ -398,11 +487,11 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
         return 'https://www.autotrader.co.uk/car-search?' + p; } },
   };
   const CATS = {
-    all: { label: 'everything', sites: ['ebay', 'fb', 'gumtree', 'vinted', 'depop', 'preloved'] },
-    fashion: { label: 'trainers & clothes', sites: ['vinted', 'ebay', 'depop', 'fb', 'gumtree'] },
-    tech: { label: 'tech & gaming', sites: ['ebay', 'cex', 'backmarket', 'fb', 'gumtree', 'vinted'] },
-    cars: { label: 'cars', sites: ['autotrader', 'ebay', 'fb', 'gumtree'] },
-    home: { label: 'home', sites: ['fb', 'gumtree', 'ebay', 'preloved'] },
+    all: { sites: ['ebay', 'fb', 'gumtree', 'vinted', 'depop', 'preloved'] },
+    fashion: { sites: ['vinted', 'ebay', 'depop', 'fb', 'gumtree'] },
+    tech: { sites: ['ebay', 'cex', 'backmarket', 'fb', 'gumtree', 'vinted'] },
+    cars: { sites: ['autotrader', 'ebay', 'fb', 'gumtree'] },
+    home: { sites: ['fb', 'gumtree', 'ebay', 'preloved'] },
   };
   const CAT_WORDS = [
     ['cars', /\b(cars?|vans?|hatchback|saloon|suv|convertible|ford|fiesta|focus|vauxhall|corsa|astra|bmw|audi|mercedes|toyota|yaris|corolla|honda|civic|nissan|qashqai|micra|vw|volkswagen|golf|polo|peugeot|kia|hyundai|tesla|range rover|land rover|skoda|octavia|fabia|seat leon|renault|clio|citroen|fiat|mazda|volvo|lexus|jaguar|porsche|motorbike|motorcycle|mot)\b/i],
@@ -443,73 +532,66 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
   }
 
   /* ---------- state ---------- */
-  const state = Object.assign({ q: '', min: '', max: '', loc: '', radius: '25', sort: 'cheap', cat: 'auto' }, store.get('last', {}));
+  const state = Object.assign({ q: '', min: '', max: '', loc: '', radius: '25', sort: 'cheap' }, store.get('last', {}));
   if (!['5', '10', '25', '50', '0'].includes(state.radius)) state.radius = '25';
   if (!['cheap', 'new'].includes(state.sort)) state.sort = 'cheap';
-  state.cat = 'auto';
+  let mode = store.get('mode', null);
   const cur = () => Object.assign({}, state, { cat: detect(state.q) });
-  const keyOf = s => s.q.toLowerCase() + '|' + s.cat;
   const persist = () => store.set('last', state);
   const priceLabel = s => s.min && s.max ? `£${s.min}–£${s.max}` : s.max ? `Under £${s.max}` : s.min ? `Over £${s.min}` : '';
-  const cleanNum = v => { const n = parseFloat(String(v).replace(/[^\d.]/g, '')); return n > 0 ? String(Math.round(n)) : ''; };
-  let est = null, estCtl = null;
 
-  /* ---------- Pro (demo subscription) ---------- */
-  const FREE_LIMIT = 3;
-  const PLANS = { year: { label: 'Yearly', price: '£24.99/year', save: 'Save 48%' }, month: { label: 'Monthly', price: '£3.99/month' } };
-  let pro = !!store.get('pro', false), plan = 'year', proReason = 'upgrade';
+  /* ---------- Pro (demo subscription) + free limits ---------- */
+  const FREE = { search: 3, check: 3, alerts: 1 };
+  const PLANS = { year: { label: 'Yearly', price: '£29.99/year', save: 'Save 50%' }, month: { label: 'Monthly', price: '£4.99/month' } };
+  let pro = !!store.get('pro', false), plan = 'year', proReason = 'upgrade', pendingTab = null;
   const today = () => new Date().toISOString().slice(0, 10);
-  const used = () => { const u = store.get('usage', {}); return u.day === today() ? u.n : 0; };
-  const left = () => Math.max(0, FREE_LIMIT - used());
-  const spend = () => { if (!pro) store.set('usage', { day: today(), n: used() + 1 }); };
-  function renderProBtn() {
+  const usage = () => { const u = store.get('usage', {}); return u.day === today() ? u : { day: today(), search: 0, check: 0 }; };
+  const left = k => Math.max(0, FREE[k] - (usage()[k] || 0));
+  const spend = k => { if (pro) return; const u = usage(); u[k] = (u[k] || 0) + 1; store.set('usage', u); };
+  function renderCounters() {
     $('#pro-btn span').textContent = pro ? 'Pro' : 'Go Pro';
-    const f = $('#free-left');
-    f.innerHTML = pro ? '' : `<b>${left()}</b> free ${left() === 1 ? 'search' : 'searches'} left today`;
-    f.hidden = pro;
+    const s = left('search'), c = left('check');
+    $('#free-left').hidden = pro; $('#free-left').innerHTML = `<b>${s}</b> free ${s === 1 ? 'search' : 'searches'} left today`;
+    $('#checks-left').hidden = pro; $('#checks-left').innerHTML = `<b>${c}</b> free ${c === 1 ? 'check' : 'checks'} left today`;
   }
   function renderPro() {
     const body = $('#pro-body'), tick = `<span class="tick">${icon('check')}</span>`;
     if (pro) {
-      body.innerHTML = `<div class="grab" aria-hidden="true"></div>
-        <span class="pro-badge">${icon('star')}PRO</span>
-        <div class="pro-head"><h2 id="p-title">You're on Pro</h2><p>Unlimited searches, saved searches and your price board.</p></div>
-        <button class="btn btn-blue" type="button" data-close>Done</button>
-        <p class="demo">Demo mode.</p>
-        <button class="link" type="button" id="go-free">Switch back to free (demo)</button>`;
+      body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
+        <div class="pro-head"><h2 id="p-title">You're on Pro</h2><p>Unlimited searches, price checks and deal alerts.</p></div>
+        <button class="btn btn-blue btn-wide" type="button" data-close>Done</button>
+        <p class="demo">Demo mode.</p><button class="link" type="button" id="go-free">Switch back to free (demo)</button>`;
       return;
     }
-    const titles = { limit: ['You\'ve used today\'s free searches', 'Go unlimited for less than a coffee a month.'],
-      saved: ['Save searches with Pro', 'Come back to them in one tap.'],
-      board: ['Compare prices with Pro', 'Line up listings from every site in one place.'],
-      upgrade: ['Get ALL FOR ONE Pro', 'Find it cheaper, every time.'] };
+    const titles = {
+      search: ['You\'ve used today\'s free searches', 'Search as much as you like with Pro.'],
+      check: ['You\'ve used today\'s free price checks', 'Never overpay again. Check every deal with Pro.'],
+      alerts: ['Get more deal alerts with Pro', 'Set alerts for everything you\'re hunting.'],
+      upgrade: ['Get ALL FOR ONE Pro', 'Never overpay. Never miss a deal.'] };
     const [h, p] = titles[proReason] || titles.upgrade;
-    body.innerHTML = `<div class="grab" aria-hidden="true"></div>
-      <span class="pro-badge">${icon('star')}PRO</span>
+    body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
       <div class="pro-head"><h2 id="p-title">${esc(h)}</h2><p>${esc(p)}</p></div>
-      <ul class="perks"><li>${tick}Unlimited searches</li><li>${tick}Save your searches</li><li>${tick}Price board</li></ul>
-      <div class="plans" role="radiogroup" aria-label="Plan">
-        ${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="plan" role="radio" data-plan="${k}" aria-checked="${k === plan}"><b>${v.label}</b><span>${v.price}</span>${v.save ? `<em>${v.save}</em>` : ''}</button>`).join('')}
-      </div>
-      <button class="btn btn-blue" type="button" id="trial-btn">Start 7-day free trial</button>
+      <ul class="perks"><li>${tick}Unlimited price checks</li><li>${tick}Unlimited searches</li><li>${tick}Deal alerts for anything you want</li></ul>
+      <div class="plans" role="radiogroup" aria-label="Plan">${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="plan" role="radio" data-plan="${k}" aria-checked="${k === plan}"><b>${v.label}</b><span>${v.price}</span>${v.save ? `<em>${v.save}</em>` : ''}</button>`).join('')}</div>
+      <button class="btn btn-blue btn-wide" type="button" id="trial-btn">Start 7-day free trial</button>
       <p class="demo">Then ${PLANS[plan].price}. Cancel anytime.<br>Demo: no payment is taken.</p>
       <button class="link" type="button" data-close>Not now</button>`;
   }
   function openPro(reason) { proReason = reason || 'upgrade'; renderPro(); openSheet('pro'); }
   $('#pro-body').addEventListener('click', e => {
     const pl = e.target.closest('[data-plan]'); if (pl) { plan = pl.dataset.plan; renderPro(); return; }
-    if (e.target.closest('#trial-btn')) { pro = true; store.set('pro', true); closeSheet(); renderProBtn(); toast('Pro unlocked (demo)'); if (pendingTab) { show(pendingTab); pendingTab = null; } return; }
-    if (e.target.closest('#go-free')) { pro = false; store.set('pro', false); closeSheet(); renderProBtn(); show('search'); toast('Back on free'); }
+    if (e.target.closest('#trial-btn')) { pro = true; store.set('pro', true); closeSheet(); renderCounters(); toast('Pro unlocked (demo)'); if (pendingTab) { const t = pendingTab; pendingTab = null; t(); } return; }
+    if (e.target.closest('#go-free')) { pro = false; store.set('pro', false); closeSheet(); renderCounters(); toast('Back on free'); }
   });
   $('#pro-btn').addEventListener('click', () => openPro('upgrade'));
 
-  /* ---------- sheets ---------- */
-  let openId = null, lastFocus = null, pendingTab = null;
+  /* ---------- sheets + toast ---------- */
+  let openId = null, lastFocus = null;
   function openSheet(id) {
     if (openId) $('#sheet-' + openId).hidden = true;
     lastFocus = lastFocus || document.activeElement; openId = id;
     const w = $('#sheet-' + id); w.hidden = false;
-    const f = w.querySelector('.sheet button:not(.x), .sheet input'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
+    const f = w.querySelector('.sheet input, .sheet button:not(.x)'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
   }
   function closeSheet() {
     if (!openId) return;
@@ -519,43 +601,94 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
   }
   $$('.sheet-wrap').forEach(w => w.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeSheet(); }));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-
   let toastT;
   function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 1800); }
 
-  /* ---------- tabs (Board + Saved are Pro) ---------- */
+  /* ---------- tabs ---------- */
   function show(tab) {
-    if (!pro && (tab === 'board' || tab === 'saved')) { pendingTab = tab; openPro(tab); return; }
     $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== tab; });
     $$('[data-tab]').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
-    if (tab === 'board') renderBoard();
-    if (tab === 'saved') renderSaved();
+    if (tab === 'alerts') renderAlerts();
+    if (tab === 'flip') renderFlip();
     window.scrollTo(0, 0);
   }
   $$('[data-tab]').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
 
-  /* ---------- results ---------- */
+  /* ---------- price estimates: price service, else Claude, else none ---------- */
+  const HIDE = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+  const sampleP = (async () => { try { return (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch (e) { return null; } })();
+  let sampleOff = false;
+  const cache = new Map();
+  const strs = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim().slice(0, 100)) : [];
+  const rng = v => (Array.isArray(v) && v.length >= 2 && typeof v[0] === 'number' && typeof v[1] === 'number' && isFinite(v[0]) && isFinite(v[1]) && Math.max(v[0], v[1]) > 0)
+    ? [Math.max(0, Math.round(Math.min(v[0], v[1]))), Math.round(Math.max(v[0], v[1]))] : null;
+  function promptFor(q, cat) {
+    const ids = CATS[cat].sites;
+    return 'You estimate typical asking prices on UK second-hand marketplaces, from general knowledge.\n'
+      + 'Item: "' + q.slice(0, 160) + '"\n'
+      + 'Marketplaces (id = name): ' + ids.map(id => id + ' = ' + SITES[id].name).join('; ') + '\n'
+      + 'Assume used condition, except cex and backmarket, which sell refurbished stock.\n'
+      + 'Reply with only one JSON object and no other text:\n'
+      + '{"typical":[low,high],"sites":{"<id>":[low,high]},"checks":["up to 2 checks before paying for this exact item, each under 10 words"]}\n'
+      + 'Prices are whole GBP numbers. Use null for a marketplace where this item rarely sells. If the item is too vague to price, set "typical" to null.';
+  }
+  function apiBase() {
+    if (API_URL) return API_URL.replace(/\/$/, '');
+    if (/^https?:$/.test(location.protocol) && !/^(localhost|127\.|10\.|192\.168\.)/.test(location.hostname) && !window.claude) return '';
+    return null;
+  }
+  function tidy(r, cat) {
+    const o = { typical: rng(r && r.typical), sites: {}, checks: strs(r && r.checks).slice(0, 2) };
+    if (r && r.sites && typeof r.sites === 'object') for (const id of CATS[cat].sites) { const v = rng(r.sites[id]); if (v) o.sites[id] = v; }
+    if (!o.typical && !Object.keys(o.sites).length) o.vague = true;
+    return o;
+  }
+  /* resolves {typical, sites, checks} | {vague} | {none} */
+  function getEstimate(q, signal) {
+    const cat = detect(q), key = q.toLowerCase().trim() + '|' + cat;
+    if (cache.has(key)) return cache.get(key);
+    const p = (async () => {
+      const base = apiBase();
+      if (base !== null) {
+        try {
+          const res = await fetch(base + '/api/estimate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, cat, sites: CATS[cat].sites }), signal });
+          if (res.ok) return tidy(await res.json(), cat);
+        } catch (e) { if (e && e.name === 'AbortError') throw e; }
+      }
+      const sm = await sampleP;
+      if (!sm || sampleOff) return { none: true };
+      try { return tidy(await sm.json(promptFor(q, cat), { modelTier: 'quick', signal, cache: { gcTime: 86400000 } }), cat); }
+      catch (e) { if (e && e.code === 'cancelled') throw e; if (HIDE.includes(e && e.code)) sampleOff = true; return { none: true }; }
+    })();
+    cache.set(key, p); p.catch(() => cache.delete(key));
+    return p;
+  }
+
+  /* ---------- SEARCH ---------- */
   const qEl = $('#q');
-  const EXAMPLES = ['PS5', 'Air Force 1 size 9', 'iPhone 13', 'Sofa under £100'];
-  $('#examples').innerHTML = EXAMPLES.map(x => `<button type="button" class="ex" data-ex="${esc(x)}">${esc(x)}</button>`).join('');
-  function estNow(s) { return est && est.key === keyOf(s) ? est : null; }
+  const EXAMPLES = { shop: ['PS5', 'Air Force 1 size 9', 'iPhone 13', 'Sofa under £100'], flip: ['Nike Dunk Low', 'AirPods Pro', 'North Face jacket', 'Nintendo Switch'] };
+  let est = null, estKey = '', estCtl = null;
+  function renderHome() {
+    $('#search-title').textContent = mode === 'flip' ? 'What are you flipping?' : 'What are you looking for?';
+    $('#examples').innerHTML = (EXAMPLES[mode] || EXAMPLES.shop).map(x => `<button type="button" class="ex" data-ex="${esc(x)}">${esc(x)}</button>`).join('');
+    $('#mode-line').textContent = mode === 'flip' ? 'Flipping mode · switch to bargain hunting' : 'Bargain mode · switch to flipping';
+  }
+  $('#mode-line').addEventListener('click', () => { setMode(mode === 'flip' ? 'shop' : 'flip'); toast(mode === 'flip' ? 'Flipping mode' : 'Bargain mode'); });
   function renderResults() {
     const s = cur(), has = !!s.q;
-    $('#home-title').hidden = has; $('#home-extra').hidden = has; $('#results').hidden = !has;
+    $('#search-title').hidden = has; $('#home-extra').hidden = has; $('#results').hidden = !has;
     if (!has) return;
-    const bits = [priceLabel(s), s.loc ? s.loc : '', s.sort === 'cheap' ? 'Cheapest first' : 'Newest first'].filter(Boolean);
-    $('#sum').textContent = bits.join(' · ');
-    const e = estNow(s), box = $('#typical');
+    $('#sum').textContent = [priceLabel(s), s.loc, s.sort === 'cheap' ? 'Cheapest first' : 'Newest first'].filter(Boolean).join(' · ');
+    const e = estKey === s.q.toLowerCase() ? est : null, box = $('#typical');
     const sold = new URLSearchParams({ _nkw: s.q, LH_Sold: '1', LH_Complete: '1', _sop: '13', LH_PrefLoc: '1' });
     const soldA = `<a href="https://www.ebay.co.uk/sch/i.html?${sold}" target="_blank" rel="noopener">Sold prices${icon('arrow')}</a>`;
-    if (!e || e.loading) { box.className = 'typical'; box.innerHTML = `<div><small>Usually goes for</small><span class="shim"></span></div>${soldA}`; }
+    if (!e) { box.className = 'typical'; box.innerHTML = `<div><small>Usually goes for</small><span class="shim"></span></div>${soldA}`; }
     else if (e.typical) {
       const [lo, hi] = e.typical; let sub = '';
-      if (s.max && +s.max < lo) sub = `Your £${s.max} budget is low for this`;
-      else if (s.max && +s.max > hi) sub = 'Your budget is plenty';
-      box.className = 'typical'; box.innerHTML = `<div><small>Usually goes for · est.</small><b>${esc(rangeTxt(e.typical))}</b>${sub ? `<span class="sub">${esc(sub)}</span>` : ''}</div>${soldA}`;
-    } else { box.className = 'typical plain'; box.innerHTML = `<div><small>${e.vague ? 'Add a model or size for a price guide' : 'What\u2019s a fair price?'}</small></div>${soldA}`; }
-
+      if (s.max && +s.max < lo) sub = `Your £${s.max} budget is low for this`; else if (s.max && +s.max > hi) sub = 'Your budget is plenty';
+      box.className = 'typical'; box.innerHTML = `<div><small>Usually goes for · est.</small><b>${esc(rangeTxt(e.typical))}</b>${sub ? `<span class="s">${esc(sub)}</span>` : ''}</div>${soldA}`;
+    } else { box.className = 'typical plain'; box.innerHTML = `<div><small>${e.vague ? 'Add a model or size for a price guide' : 'What’s a fair price?'}</small></div>${soldA}`; }
+    $('#flipit-btn').hidden = mode !== 'flip';
     let ids = CATS[s.cat].sites.slice();
     const priced = e && e.sites ? ids.filter(id => e.sites[id]) : [];
     if (priced.length) ids.sort((a, b) => (e.sites[a] ? e.sites[a][0] : 1e12) - (e.sites[b] ? e.sites[b][0] : 1e12));
@@ -563,69 +696,24 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
     $('#rows').innerHTML = ids.map(id => {
       const site = SITES[id], r = e && e.sites && e.sites[id];
       const needs = ((s.min || s.max) && !site.can.price) || (site.can.sort !== 1 && site.can.sort !== s.sort);
-      const price = (!e || e.loading) ? '<i aria-label="Loading price"></i>' : r ? `<b>${esc(rangeTxt(r))}</b><small>est.</small>` : '<small>on site</small>';
+      const price = !e ? '<i aria-label="Loading price"></i>' : r ? `<b>${esc(rangeTxt(r))}</b><small>est.</small>` : '<small>on site</small>';
       const sub = id === top ? '<span class="cheap">Cheapest</span>' : needs ? '<span>Set filters on site</span>' : '';
       return `<li class="rs${id === top ? ' top' : ''}"><span class="mono" aria-hidden="true">${site.mono}</span>
-        <div class="rs-name"><b>${esc(site.name)}</b>${sub}</div>
-        <div class="rs-price">${price}</div>
+        <div class="rs-name"><b>${esc(site.name)}</b>${sub}</div><div class="rs-price">${price}</div>
         <a class="open" href="${esc(site.url(s))}" target="_blank" rel="noopener" aria-label="Open ${esc(site.name)} listings">Open${icon('arrow')}</a></li>`;
     }).join('');
   }
-  function renderTips() {
-    const s = cur(), e = estNow(s), tick = `<span class="tick">${icon('check')}</span>`;
-    const base = s.cat === 'all' ? CHECKS.all : CHECKS[s.cat];
-    const list = (e && e.checks && e.checks.length ? e.checks.map(esc).concat(base) : base).slice(0, 4);
-    $('#checks').innerHTML = list.map(x => `<li>${tick}<span>${x}</span></li>`).join('');
-  }
-  $('#tips-btn').addEventListener('click', () => { renderTips(); openSheet('tips'); });
-
-  /* ---------- AI price estimates ---------- */
-  const HIDE = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
-  const sampleP = (async () => { try { return (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch (e) { return null; } })();
-  let sampleOff = false;
-  const strs = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim().slice(0, 100)) : [];
-  const rng = v => (Array.isArray(v) && v.length >= 2 && typeof v[0] === 'number' && typeof v[1] === 'number' && isFinite(v[0]) && isFinite(v[1]) && Math.max(v[0], v[1]) > 0)
-    ? [Math.max(0, Math.round(Math.min(v[0], v[1]))), Math.round(Math.max(v[0], v[1]))] : null;
-  function promptFor(s) {
-    const ids = CATS[s.cat].sites;
-    return 'You estimate typical asking prices on UK second-hand marketplaces, from general knowledge.\n'
-      + 'Item searched: "' + s.q.slice(0, 160) + '"\n'
-      + 'Marketplaces (id = name): ' + ids.map(id => id + ' = ' + SITES[id].name).join('; ') + '\n'
-      + 'Assume used condition, except cex and backmarket, which sell refurbished stock.\n'
-      + 'Reply with only one JSON object and no other text:\n'
-      + '{"typical":[low,high],"sites":{"<id>":[low,high]},"checks":["up to 2 checks before paying for this exact item, each under 10 words"]}\n'
-      + 'Prices are whole GBP numbers. Use null for a marketplace where this item rarely sells. If the search is too vague to price, set "typical" to null.';
-  }
-  async function estimate() {
+  async function loadEstimate() {
     const s = cur(); if (!s.q) return;
-    const key = keyOf(s);
-    if (est && est.key === key && !est.loading) { renderResults(); return; }
-    if (estCtl) estCtl.abort();
-    const ctl = estCtl = new AbortController();
-    est = { key, loading: true }; renderResults();
-    const sm = await sampleP;
-    if (ctl !== estCtl) return;
-    if (!sm || sampleOff) { est = { key, none: true }; renderResults(); return; }
-    try {
-      const r = await sm.json(promptFor(s), { modelTier: 'quick', signal: ctl.signal, cache: { gcTime: 86400000 } });
-      if (ctl !== estCtl) return;
-      const o = { key, typical: rng(r && r.typical), sites: {}, checks: strs(r && r.checks).slice(0, 2) };
-      if (r && r.sites && typeof r.sites === 'object') for (const id of CATS[s.cat].sites) { const v = rng(r.sites[id]); if (v) o.sites[id] = v; }
-      if (!o.typical && !Object.keys(o.sites).length) { o.none = true; o.vague = true; }
-      est = o;
-    } catch (e) {
-      const code = e && e.code;
-      if (code === 'cancelled' || ctl !== estCtl) return;
-      if (HIDE.includes(code)) sampleOff = true;
-      est = { key, none: true, code };
-    }
+    const key = s.q.toLowerCase(); if (estKey === key && est) { renderResults(); return; }
+    if (estCtl) estCtl.abort(); const ctl = estCtl = new AbortController();
+    estKey = key; est = null; renderResults();
+    try { const r = await getEstimate(s.q, ctl.signal); if (ctl !== estCtl) return; est = r; } catch (e) { return; }
     renderResults();
   }
-
-  /* ---------- run a search (counts toward free limit) ---------- */
-  function runSearch(raw, preset) {
+  function runSearch(raw, preset, free) {
     raw = (raw || '').trim(); if (!raw) { qEl.focus(); return; }
-    if (!pro && left() <= 0) { openPro('limit'); return; }
+    if (!free && !pro && left('search') <= 0) { pendingTab = () => runSearch(raw, preset, free); openPro('search'); return; }
     if (preset) Object.assign(state, preset);
     else {
       const p = parse(raw);
@@ -633,15 +721,28 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
       state.q = p.q || raw;
       if (state.min && state.max && +state.min > +state.max) { const m = state.min; state.min = state.max; state.max = m; }
     }
-    spend(); renderProBtn();
-    qEl.value = state.q; qEl.blur(); persist();
-    show('search'); renderResults(); estimate();
+    if (!free) spend('search');
+    renderCounters(); qEl.value = state.q; qEl.blur(); persist();
+    show('search'); renderResults(); loadEstimate();
   }
   $('#search-form').addEventListener('submit', e => { e.preventDefault(); runSearch(qEl.value); });
   $('#examples').addEventListener('click', e => { const b = e.target.closest('[data-ex]'); if (b) runSearch(b.dataset.ex); });
   $('#logo').addEventListener('click', () => { state.q = ''; qEl.value = ''; persist(); show('search'); renderResults(); });
+  $('#tips-btn').addEventListener('click', () => {
+    const s = cur(), tick = `<span class="tick">${icon('check')}</span>`;
+    const base = s.cat === 'all' ? CHECKS.all : CHECKS[s.cat];
+    const e = estKey === s.q.toLowerCase() ? est : null;
+    const list = ((e && e.checks && e.checks.length) ? e.checks.map(esc).concat(base) : base).slice(0, 4);
+    $('#checks').innerHTML = list.map(x => `<li>${tick}<span>${x}</span></li>`).join('');
+    openSheet('tips');
+  });
+  $('#flipit-btn').addEventListener('click', () => {
+    const e = est && estKey === state.q.toLowerCase() ? est : null;
+    flip.item = state.q; flip.sell = e && e.typical ? String(Math.round((e.typical[0] + e.typical[1]) / 2)) : flip.sell; flip.buy = '';
+    saveFlip(); show('flip'); setTimeout(() => $('#f-buy').focus(), 50);
+  });
 
-  /* ---------- filters ---------- */
+  /* filters */
   const PRICE_PILLS = ['50', '100', '250', '500'];
   const DIST = [['5', '5 mi'], ['10', '10 mi'], ['25', '25 mi'], ['50', '50 mi'], ['0', 'Anywhere']];
   function syncFilters() {
@@ -660,65 +761,138 @@ button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-selec
   $('#max').addEventListener('input', e => { state.max = cleanNum(e.target.value); $$('#price-pills .pill').forEach(b => b.setAttribute('aria-pressed', String(!state.min && state.max === b.dataset.maxp))); });
   $('#loc').addEventListener('input', e => { state.loc = e.target.value.trim().slice(0, 40); });
 
-  /* ---------- saved (Pro) ---------- */
-  let saved = store.get('saved', []);
-  const savedKey = s => [s.q, s.min, s.max, s.loc].join('|');
-  $('#save-btn').addEventListener('click', () => {
-    if (!pro) { openPro('saved'); return; }
-    const s = { q: state.q, min: state.min, max: state.max, loc: state.loc, radius: state.radius, sort: state.sort };
-    saved = [s].concat(saved.filter(x => savedKey(x) !== savedKey(s))).slice(0, 20);
-    store.set('saved', saved); toast('Saved');
-  });
-  function renderSaved() {
-    const el = $('#saved');
-    if (!saved.length) { el.innerHTML = '<li class="empty">Nothing saved yet. Tap the bookmark on any search.</li>'; return; }
-    el.innerHTML = saved.map((s, i) => `<li class="sv"><div class="grow"><b>${esc(s.q)}</b><span>${esc([priceLabel(s), s.loc].filter(Boolean).join(' · ') || 'Anywhere')}</span></div>
-      <button type="button" class="btn btn-blue" style="padding:9px 14px;font-size:.85rem" data-load="${i}">Search</button>
-      <button type="button" class="x" data-del="${i}" aria-label="Remove ${esc(s.q)}">×</button></li>`).join('');
-  }
-  $('#saved').addEventListener('click', e => {
-    const l = e.target.closest('[data-load]'), d = e.target.closest('[data-del]');
-    if (l) { const s = saved[+l.dataset.load]; runSearch(s.q, s); }
-    if (d) { saved.splice(+d.dataset.del, 1); store.set('saved', saved); renderSaved(); }
-  });
-
-  /* ---------- price board (Pro) ---------- */
+  /* ---------- PRICE CHECK ---------- */
   const HOSTS = [['ebay.', 'eBay'], ['facebook.', 'Facebook'], ['fb.com', 'Facebook'], ['gumtree.', 'Gumtree'], ['vinted.', 'Vinted'], ['depop.', 'Depop'], ['preloved.', 'Preloved'], ['webuy.', 'CeX'], ['backmarket.', 'Back Market'], ['autotrader.', 'AutoTrader']];
   const siteOf = u => { try { const h = new URL(u).hostname.replace(/^www\./, ''); const m = HOSTS.find(([k]) => h.includes(k)); return m ? m[1] : h; } catch (e) { return ''; } };
-  const BOARD_EX = [{ title: 'AF1 white, UK 9', price: 38, site: 'Vinted' }, { title: 'Air Force 1, boxed', price: 45, site: 'eBay' }, { title: 'AF1 size 9, collect', price: 30, site: 'Facebook' }];
-  let board = store.get('board', []);
-  function renderBoard() {
-    const isEx = !board.length;
-    const rows = (isEx ? BOARD_EX : board).map((r, i) => Object.assign({ i }, r)).sort((a, b) => a.price - b.price);
-    const best = rows[0];
-    $('#board-sum').textContent = isEx ? 'Examples. Add your own above.' : `Best: ${gbp(best.price)} on ${best.site}`;
-    $('#board').innerHTML = rows.map((r, n) => {
-      const meta = esc(r.site) + (isEx ? ' · example' : n > 0 ? ' · +' + esc(gbp(Math.round((r.price - best.price) * 100) / 100)) : '');
-      return `<li class="lot${isEx ? ' ex' : ''}${n === 0 ? ' best' : ''}"><span class="lot-price">${esc(gbp(r.price))}</span><div class="grow"><b>${esc(r.title)}</b><span>${meta}</span></div>${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">View</a>` : ''}${isEx ? '' : `<button type="button" class="x" data-rm="${r.i}" aria-label="Remove ${esc(r.title)}">×</button>`}</li>`;
-    }).join('');
-    $('#clear-btn').hidden = isEx; $('#clear-confirm').hidden = true;
+  const SKIP = ['itm', 'items', 'item', 'products', 'product', 'p', 'listing', 'listings', 'marketplace', 'ad', 'p-ad', 'catalog', 'en-gb'];
+  function nameFromUrl(u) {
+    try {
+      const parts = new URL(u).pathname.split('/').filter(Boolean).map(x => decodeURIComponent(x));
+      const cand = parts.filter(x => !/^\d+$/.test(x) && !SKIP.includes(x.toLowerCase()) && /[a-z]/i.test(x));
+      let slug = cand.pop() || ''; slug = slug.replace(/\.\w+$/, '').replace(/^\d+[-_]+/, '').replace(/[-_]+\d{5,}$/, '');
+      if (slug.length < 4) return '';
+      return titleCase(slug.replace(/[-_+]+/g, ' ').toLowerCase()).slice(0, 60);
+    } catch (e) { return ''; }
   }
-  $('#add-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const url = $('#lot-url').value.trim(), title = $('#lot-title').value.trim();
-    const price = parseFloat($('#lot-price').value.replace(/[^\d.]/g, '')), err = $('#lot-err');
-    if (url && !/^https?:\/\//i.test(url)) { err.textContent = 'Paste the full link, starting with https://'; err.hidden = false; return; }
-    if (!(price > 0)) { err.textContent = 'Add the price.'; err.hidden = false; $('#lot-price').focus(); return; }
-    err.hidden = true;
-    const site = url ? siteOf(url) : 'Listing';
-    board.push({ url, price: Math.round(price * 100) / 100, site, title: (title || site + ' listing').slice(0, 60) });
-    store.set('board', board); renderBoard(); toast('Added');
-    $('#lot-url').value = ''; $('#lot-title').value = ''; $('#lot-price').value = '';
+  $('#c-url').addEventListener('input', e => {
+    const u = e.target.value.trim(); if (!/^https?:\/\//i.test(u)) return;
+    const n = nameFromUrl(u); if (n && !$('#c-item').value.trim()) $('#c-item').value = n;
   });
-  $('#board').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (!b) return; board.splice(+b.dataset.rm, 1); store.set('board', board); renderBoard(); });
-  $('#clear-btn').addEventListener('click', () => { $('#clear-confirm').hidden = false; $('#clear-btn').hidden = true; });
-  $('#clear-no').addEventListener('click', () => { $('#clear-confirm').hidden = true; $('#clear-btn').hidden = false; });
-  $('#clear-yes').addEventListener('click', () => { board = []; store.set('board', board); renderBoard(); });
+  let checkCtl = null;
+  function verdictFor(price, typ) {
+    const [lo, hi] = typ, mid = (lo + hi) / 2;
+    if (price < lo * 0.6) return { cls: 'v-sus', label: 'Too good to be true?', line: `That's far below the usual price. Check carefully for a scam or a fake.` };
+    if (price <= lo) return { cls: 'v-good', label: 'Great deal', line: `About ${gbp(Math.round(mid - price))} less than usual.` };
+    if (price <= hi) return { cls: 'v-fair', label: 'Fair price', line: price <= mid ? 'Right in the normal range, on the cheaper side.' : 'In the normal range. You could try offering a little less.' };
+    return { cls: 'v-high', label: 'Overpriced', line: `About ${gbp(Math.round(price - hi))} more than the usual top price. Try an offer, or look elsewhere.` };
+  }
+  function renderVerdict(item, price, url, e) {
+    const cat = detect(item), tick = `<span class="tick">${icon('check')}</span>`;
+    const sold = new URLSearchParams({ _nkw: item, LH_Sold: '1', LH_Complete: '1', _sop: '13', LH_PrefLoc: '1' });
+    const acts = `<div class="acts"><a href="https://www.ebay.co.uk/sch/i.html?${sold}" target="_blank" rel="noopener">Sold prices${icon('arrow')}</a><button type="button" id="v-find">Find it cheaper</button><button type="button" id="v-flip">Flip it?</button></div>`;
+    const checks = ((e && e.checks && e.checks.length) ? e.checks.map(esc) : []).concat(cat === 'all' ? CHECKS.all : CHECKS[cat]).slice(0, 4);
+    const flags = `<div class="panel"><p class="label">Before you pay</p><ul class="checks">${checks.map(x => `<li>${tick}<span>${x}</span></li>`).join('')}</ul></div>`;
+    let head;
+    if (!e) head = `<div class="verdict"><span class="vpill v-none">Checking…</span><span class="shim" style="width:160px;height:28px;color:var(--ink)"></span></div>`;
+    else if (e.typical) {
+      const v = verdictFor(price, e.typical);
+      head = `<div class="verdict"><span class="vpill ${v.cls}">${v.label}</span><span class="big">${esc(gbp(price))}</span><p>Usually ${esc(rangeTxt(e.typical))} used${url ? ' · ' + esc(siteOf(url)) : ''}. ${esc(v.line)}</p>${acts}</div>`;
+    } else if (e.vague) head = `<div class="verdict"><span class="vpill v-none">Need more detail</span><p>Add the model, size or storage (like "iPhone 13 128GB") for a verdict.</p>${acts}</div>`;
+    else head = `<div class="verdict"><span class="vpill v-none">Live checks coming soon</span><p>Instant verdicts switch on in the next update. For now, compare with what it actually sold for.</p>${acts}</div>`;
+    $('#verdict').innerHTML = head + (e ? flags : '');
+    const f = $('#v-find'); if (f) f.onclick = () => runSearch(item);
+    const fl = $('#v-flip'); if (fl) fl.onclick = () => { flip.item = item; flip.buy = String(price); flip.sell = e && e.typical ? String(Math.round((e.typical[0] + e.typical[1]) / 2)) : ''; saveFlip(); show('flip'); };
+  }
+  $('#check-form').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const url = $('#c-url').value.trim(); let item = $('#c-item').value.trim(); const price = num($('#c-price').value), err = $('#c-err');
+    if (!item && url) item = nameFromUrl(url);
+    if (!item) { err.textContent = 'Type what it is, like "PS5 Slim" or "AirPods Pro 2".'; err.hidden = false; $('#c-item').focus(); return; }
+    if (!(price > 0)) { err.textContent = 'Add the asking price.'; err.hidden = false; $('#c-price').focus(); return; }
+    err.hidden = true; $('#c-item').value = item;
+    if (!pro && left('check') <= 0) { openPro('check'); return; }
+    spend('check'); renderCounters(); document.activeElement && document.activeElement.blur();
+    if (checkCtl) checkCtl.abort(); const ctl = checkCtl = new AbortController();
+    renderVerdict(item, price, url, null);
+    let e; try { e = await getEstimate(item, ctl.signal); } catch (x) { return; }
+    if (ctl !== checkCtl) return;
+    renderVerdict(item, price, url, e);
+    $('#verdict').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  /* ---------- ALERTS ---------- */
+  let alerts = store.get('alerts', []);
+  const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
+  function renderAlerts() {
+    const el = $('#alerts');
+    if (!alerts.length) { el.innerHTML = '<li class="empty">No alerts yet. Add the things you\'re hunting for.</li>'; return; }
+    el.innerHTML = alerts.map((a, i) => `<li class="al"><span class="bell">${icon('bell')}</span><div class="grow"><b>${esc(a.q)}</b><span>${esc([a.max ? 'Under £' + a.max : 'Any price', a.loc || 'Anywhere'].join(' · '))}${a.checked ? ' · checked ' + ago(a.checked) : ''}</span></div>
+      <button type="button" class="btn btn-blue" data-run="${i}">Check</button><button type="button" class="x" data-del="${i}" aria-label="Delete alert for ${esc(a.q)}">×</button></li>`).join('');
+  }
+  function openAlertForm(pre) {
+    if (!pro && alerts.length >= FREE.alerts) { pendingTab = () => openAlertForm(pre); openPro('alerts'); return; }
+    $('#a-item').value = pre ? pre.q : ''; $('#a-max').value = pre ? pre.max || '' : ''; $('#a-loc').value = pre ? pre.loc || '' : ''; $('#a-err').hidden = true;
+    openSheet('alert');
+  }
+  $('#new-alert').addEventListener('click', () => openAlertForm(null));
+  $('#alert-btn').addEventListener('click', () => openAlertForm({ q: state.q, max: state.max, loc: state.loc }));
+  $('#alert-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const q = $('#a-item').value.trim(); if (!q) { $('#a-err').textContent = 'Say what you want, like "PS5 Slim".'; $('#a-err').hidden = false; return; }
+    alerts.unshift({ q: q.slice(0, 80), max: cleanNum($('#a-max').value), loc: $('#a-loc').value.trim().slice(0, 40), created: Date.now(), checked: 0 });
+    store.set('alerts', alerts); closeSheet(); toast('Alert saved'); show('alerts');
+  });
+  $('#alerts').addEventListener('click', e => {
+    const r = e.target.closest('[data-run]'), d = e.target.closest('[data-del]');
+    if (r) { const a = alerts[+r.dataset.run]; a.checked = Date.now(); store.set('alerts', alerts); runSearch(a.q, { q: a.q, min: '', max: a.max, loc: a.loc, sort: 'new' }, true); }
+    if (d) { alerts.splice(+d.dataset.del, 1); store.set('alerts', alerts); renderAlerts(); }
+  });
+
+  /* ---------- FLIP ---------- */
+  /* Approximate UK seller fees, checked Oct 2026. pct = % of sale price, fixed = per order (£) */
+  const PLATS = [
+    { id: 'ebay', name: 'eBay (business)', pct: 12.8, fixed: 0.40 },
+    { id: 'vinted', name: 'Vinted', pct: 0, fixed: 0 },
+    { id: 'depop', name: 'Depop', pct: 2.9, fixed: 0.30 },
+    { id: 'fb', name: 'Facebook (local)', pct: 0, fixed: 0 },
+  ];
+  const flip = Object.assign({ item: '', buy: '', sell: '', plat: 'vinted', post: '', other: '' }, store.get('flip', {}));
+  const saveFlip = () => store.set('flip', flip);
+  function renderFlip() {
+    $('#f-item').value = flip.item; $('#f-buy').value = flip.buy; $('#f-sell').value = flip.sell; $('#f-post').value = flip.post; $('#f-other').value = flip.other;
+    $('#f-plat').innerHTML = PLATS.map(p => `<button type="button" class="pill" data-plat="${p.id}" aria-pressed="${flip.plat === p.id}">${p.name}</button>`).join('');
+    calcFlip();
+  }
+  function calcFlip() {
+    const p = PLATS.find(x => x.id === flip.plat) || PLATS[1];
+    const buy = num(flip.buy), sell = num(flip.sell), post = num(flip.post), other = num(flip.other);
+    const fees = sell > 0 ? Math.round((sell * p.pct / 100 + p.fixed) * 100) / 100 : 0;
+    const profit = Math.round((sell - fees - post - other - buy) * 100) / 100;
+    const roi = buy > 0 ? Math.round(profit / buy * 100) : 0;
+    const breakeven = p.pct < 100 ? Math.ceil(((buy + post + other + p.fixed) / (1 - p.pct / 100)) * 100) / 100 : 0;
+    const ready = buy > 0 && sell > 0;
+    $('#f-result').innerHTML = `<div class="stat main"><small>${ready ? (profit >= 0 ? 'Your profit' : 'You\'d lose') : 'Your profit'}</small><b class="${ready ? (profit >= 0 ? 'pos' : 'neg') : ''}">${ready ? gbp(Math.abs(profit)) : '£–'}</b></div>
+      <div class="stat"><small>Return</small><b>${ready ? roi + '%' : '–'}</b></div>
+      <div class="stat"><small>Fees</small><b>${ready ? gbp(fees) : '–'}</b></div>
+      <div class="stat"><small>Break even</small><b>${buy > 0 ? gbp(breakeven) : '–'}</b></div>`;
+    $('#f-note').innerHTML = `Fees are approximate${p.pct ? ` (${p.name}: ${p.pct}% + ${gbp(p.fixed)})` : ` (${p.name}: no seller fee)`}. Buying to resell counts as a business on eBay, and sites share seller details with HMRC after 30 sales or about £1,700 a year.`;
+  }
+  ['item', 'buy', 'sell', 'post', 'other'].forEach(k => $('#f-' + k).addEventListener('input', e => { flip[k] = e.target.value; saveFlip(); calcFlip(); }));
+  $('#f-plat').addEventListener('click', e => { const b = e.target.closest('[data-plat]'); if (!b) return; flip.plat = b.dataset.plat; saveFlip(); renderFlip(); });
+
+  /* ---------- mode + first open ---------- */
+  function setMode(m) { mode = m; store.set('mode', m); renderHome(); renderResults(); }
+  $('#onboard').addEventListener('click', e => {
+    const b = e.target.closest('[data-mode]'); if (!b) return;
+    setMode(b.dataset.mode); $('#onboard').hidden = true;
+    show(mode === 'flip' ? 'search' : 'search'); setTimeout(() => qEl.focus(), 50);
+  });
 
   /* ---------- boot ---------- */
   qEl.value = state.q;
-  renderProBtn(); show('search'); renderResults();
-  if (state.q) estimate();
+  if (!mode) { mode = 'shop'; $('#onboard').hidden = false; }
+  renderHome(); renderCounters(); show('search'); renderResults();
+  if (state.q) loadEstimate();
 })();
 </script>
 
