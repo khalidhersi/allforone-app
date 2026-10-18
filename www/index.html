@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F6F7F9">
+<meta name="description" content="One search across eBay, Vinted, Facebook Marketplace, Gumtree and more.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
 :root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -713,12 +717,20 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
 </script>
 
 <script>
-document.addEventListener('click', function (e) {
-  var a = e.target.closest && e.target.closest('a[href^="http"]');
-  if (!a) return;
-  e.preventDefault();
-  window.location.href = a.href;
-}, true);
+(function () {
+  var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  if (isNative) {
+    // Open marketplace links in the phone's browser (or the site's own app) instead of inside this app
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="http"]');
+      if (!a) return;
+      e.preventDefault();
+      window.location.href = a.href;
+    }, true);
+  } else if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+})();
 </script>
 </body>
 </html>
