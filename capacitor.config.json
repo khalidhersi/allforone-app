@@ -1,0 +1,8 @@
+{
+  "appId": "com.allforone.app",
+  "appName": "ALL FOR ONE",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#F6F7F9"
+  }
+}
