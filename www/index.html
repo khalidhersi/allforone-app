@@ -9,7 +9,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
-:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light;padding-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));padding-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 img{max-width:100%}
 [hidden]{display:none!important}
@@ -51,14 +51,14 @@ img{max-width:100%}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font:500 16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));z-index:30;background:var(--bg)}
 button{font-family:inherit}
 :focus-visible{outline:2.5px solid var(--blue);outline-offset:2px}
 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.in{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:720px;margin:0 auto;padding-left:max(16px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));padding-right:max(16px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px)))}
 
 /* top bar */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
+.bar{position:sticky;top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));z-index:20;background:var(--bg)}
 .bar .in{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
 .logo{display:flex;align-items:center;gap:8px;font:800 1.05rem var(--font);letter-spacing:.03em;color:var(--ink);background:none;border:0;padding:0;cursor:pointer}
 .logo-tag{width:24px;height:16px;background:var(--blue);clip-path:polygon(7px 0,100% 0,100% 100%,7px 100%,0 50%);position:relative;flex:none}
@@ -68,15 +68,15 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .topnav button[aria-current="page"]{color:var(--ink);background:var(--soft)}
 .pro-btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:8px 14px;font:800 .85rem var(--font);background:var(--gold-soft);color:var(--gold-ink);cursor:pointer}
 .pro-btn svg.i{width:15px;height:15px;fill:var(--gold);stroke:var(--gold)}
-main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
-.view{display:grid;gap:16px}
+main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))}
+.view{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 
 /* home */
 .home h1{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em;margin:28px 0 4px;text-wrap:balance}
 .search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:6px 6px 6px 14px;box-shadow:var(--shadow)}
 .search:focus-within{border-color:var(--blue)}
 .search > svg{color:var(--muted)}
-.search input{flex:1;min-width:0;border:0;background:transparent;font:600 1rem var(--font);color:var(--ink);padding:11px 0;outline:none}
+.search input{flex:1;min-width:0;width:0;border:0;background:transparent;font:600 1rem var(--font);color:var(--ink);padding:11px 0;outline:none}
 .search input::placeholder{color:var(--muted);font-weight:500}
 .btn{border:0;border-radius:12px;padding:12px 18px;font:800 .95rem var(--font);cursor:pointer;white-space:nowrap}
 .btn-blue{background:var(--blue);color:var(--on-blue)}
@@ -150,7 +150,7 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
 .empty{padding:26px 16px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:16px}
 
 /* tab bar */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:repeat(3,1fr)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(6px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(8px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;grid-template-columns:repeat(3,1fr)}
 .tab{display:grid;justify-items:center;gap:2px;background:none;border:0;color:var(--muted);font:700 .72rem var(--font);padding:6px 0;cursor:pointer}
 .tab[aria-current="page"]{color:var(--blue)}
 .tab .lock{font-size:.62rem;color:var(--gold-ink)}
@@ -158,7 +158,7 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
 /* sheets */
 .sheet-wrap{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .scrim{position:absolute;inset:0;background:var(--scrim)}
-.sheet{position:relative;width:100%;max-width:480px;max-height:90vh;max-height:90dvh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:10px max(20px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));display:grid;gap:18px}
+.sheet{position:relative;width:100%;max-width:480px;max-height:90vh;max-height:90dvh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:10px max(20px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(20px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(20px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;gap:18px}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);justify-self:center}
 .sheet-head{display:flex;justify-content:space-between;align-items:center}
 .sheet h2{font:800 1.2rem var(--font);margin:0;letter-spacing:-.02em}
@@ -196,7 +196,7 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
 .center{text-align:center;margin:0}
 .demo{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
 .link{background:none;border:0;color:var(--muted);font:700 .9rem var(--font);cursor:pointer;justify-self:center;padding:6px}
-.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:50;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:50;white-space:nowrap}
 
 @media (prefers-reduced-motion:no-preference){
   .shim,.rs-price i{animation:sh 1.4s linear infinite}
@@ -219,6 +219,12 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
   .mono{width:36px;height:36px}
   .rs .open{grid-column:2 / -1;justify-content:center}
 }
+
+/* app feel */
+html,body{overscroll-behavior-y:none}
+*{-webkit-tap-highlight-color:transparent}
+button,a,.tab,.pill,.ex,.open,.plan{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.rows,.list,.examples{max-width:100%}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -548,7 +554,7 @@ main{padding-block:4px calc(96px + env(safe-area-inset-bottom,0px))}
       if (s.max && +s.max < lo) sub = `Your £${s.max} budget is low for this`;
       else if (s.max && +s.max > hi) sub = 'Your budget is plenty';
       box.className = 'typical'; box.innerHTML = `<div><small>Usually goes for · est.</small><b>${esc(rangeTxt(e.typical))}</b>${sub ? `<span class="sub">${esc(sub)}</span>` : ''}</div>${soldA}`;
-    } else { box.className = 'typical plain'; box.innerHTML = `<div><small>${e.vague ? 'Add a model or size for a price guide' : 'Price guide not available'}</small></div>${soldA}`; }
+    } else { box.className = 'typical plain'; box.innerHTML = `<div><small>${e.vague ? 'Add a model or size for a price guide' : 'What\u2019s a fair price?'}</small></div>${soldA}`; }
 
     let ids = CATS[s.cat].sites.slice();
     const priced = e && e.sites ? ids.filter(id => e.sites[id]) : [];
