@@ -22,7 +22,7 @@ img{max-width:100%}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <style>
-/* Layout: calm phone-first app. Four tabs (Search, Check, Alerts, Flip), one job per screen, bottom tabs on phones, top tabs on desktop. */
+/* Layout: calm phone-first app. Login first, then four tabs (Search, Check, Alerts, Flip), one job per screen. Admin panel opens from Account. */
 :root{
   /* Colour roles: navy = trust, blue = action, green = money saved, amber = careful, gold = Pro only */
   --bg:#F6F7F9; --surface:#FFFFFF; --soft:#EEF1F5; --ink:#0F1B2D; --ink-2:#344257; --muted:#67758A; --line:#E3E7EE;
@@ -30,6 +30,7 @@ img{max-width:100%}
   --green:#0E9F63; --green-soft:#E2F5EC; --green-ink:#076B42;
   --amber:#C26A00; --amber-soft:#FFF0DC; --amber-ink:#7A4300;
   --gold:#F2B705; --gold-soft:#FFF4D1; --gold-ink:#6B4E00;
+  --knob:#FFFFFF;
   --scrim:rgba(15,27,45,.45); --shadow:0 1px 2px rgba(15,27,45,.04),0 8px 24px -14px rgba(15,27,45,.22);
   --font:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -52,6 +53,7 @@ img{max-width:100%}
   --scrim:rgba(0,0,0,.6); --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.8); color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font:500 16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));z-index:30;background:var(--bg)}
@@ -69,8 +71,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .topnav{display:none}
 .topnav button{background:none;border:0;padding:8px 14px;border-radius:999px;font:700 .92rem var(--font);color:var(--muted);cursor:pointer}
 .topnav button[aria-current="page"]{color:var(--ink);background:var(--soft)}
+.top-right{display:flex;align-items:center;gap:8px}
 .pro-btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:8px 14px;font:800 .85rem var(--font);background:var(--gold-soft);color:var(--gold-ink);cursor:pointer}
 .pro-btn svg.i{width:15px;height:15px;fill:var(--gold);stroke:var(--gold)}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--surface);font:800 .95rem var(--font);border:0;cursor:pointer;flex:none}
 main{padding-block:4px calc(96px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))}
 .view{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 
@@ -79,12 +83,14 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .sub{margin:-8px 0 0;color:var(--muted)}
 .quiet{margin:0;font-size:.88rem;color:var(--muted)}
 .quiet b{color:var(--ink)}
+.stack{display:grid;gap:10px}
 .search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:6px 6px 6px 14px;box-shadow:var(--shadow)}
 .search:focus-within{border-color:var(--blue)}
 .search > svg{color:var(--muted)}
 .search input{flex:1;min-width:0;width:0;border:0;background:transparent;font:600 1rem var(--font);color:var(--ink);padding:11px 0;outline:none}
 .search input::placeholder{color:var(--muted);font-weight:500}
 .btn{border:0;border-radius:12px;padding:12px 18px;font:800 .95rem var(--font);cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:default}
 .btn-blue{background:var(--blue);color:var(--on-blue)}
 .btn-soft{background:var(--soft);color:var(--ink)}
 .btn-wide{width:100%;padding-block:14px}
@@ -108,6 +114,9 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .empty{padding:22px 16px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:16px;margin:0}
 .x{border:0;background:var(--soft);color:var(--ink);width:32px;height:32px;border-radius:50%;font-size:1.05rem;line-height:1;cursor:pointer;flex:none}
 .note{margin:0;font-size:.82rem;color:var(--ink-2);background:var(--soft);padding:10px 12px;border-radius:12px}
+.grow{min-width:0;flex:1;display:grid}
+.grow b{font-weight:800;font-size:.95rem;overflow-wrap:anywhere}
+.grow span{font-size:.78rem;color:var(--muted);font-weight:600}
 
 /* search results */
 .sumline{display:flex;align-items:center;gap:8px}
@@ -161,23 +170,48 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .verdict .acts a,.verdict .acts button{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 13px;font:800 .85rem var(--font);text-decoration:none;cursor:pointer}
 .verdict .acts svg.i{width:15px;height:15px}
 
-/* alerts */
+/* lists */
 .list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .al{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
 .al .bell{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue-ink);flex:none}
-.grow{min-width:0;flex:1;display:grid}
-.grow b{font-weight:800;font-size:.95rem;overflow-wrap:anywhere}
-.grow span{font-size:.78rem;color:var(--muted);font-weight:600}
 .al .btn{padding:9px 13px;font-size:.85rem}
 
-/* flip */
+/* flip + stats */
 .result{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:2px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:2px;min-width:0}
 .stat small{font-size:.75rem;font-weight:700;color:var(--muted)}
 .stat b{font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .stat.main{grid-column:1 / -1;padding:16px}
 .stat.main b{font-size:2rem;letter-spacing:-.02em}
 .pos{color:var(--green)} .neg{color:var(--amber)}
+#ad-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* account + admin */
+.acct{display:flex;align-items:center;gap:12px}
+.acct .avatar{width:48px;height:48px;font-size:1.15rem;cursor:default}
+.plan-pill{display:inline-block;font-size:.78rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--ink-2);margin-top:4px;justify-self:start}
+.plan-pill.pro{background:var(--gold-soft);color:var(--gold-ink)}
+.vrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.srow{display:flex;align-items:center;gap:12px}
+.srow + .srow{border-top:1px solid var(--line);padding-top:12px}
+.state{font-size:.78rem;font-weight:800;padding:3px 10px;border-radius:999px;flex:none}
+.state.on{background:var(--green-soft);color:var(--green-ink)}
+.state.off{background:var(--amber-soft);color:var(--amber-ink)}
+.switch{position:relative;width:50px;height:30px;border-radius:999px;background:var(--line);border:0;cursor:pointer;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--knob);box-shadow:0 1px 3px rgba(15,27,45,.25)}
+.switch[aria-checked="true"]{background:var(--green)}
+.switch[aria-checked="true"]::after{transform:translateX(20px)}
+.ur{display:flex;align-items:center;gap:12px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.ur .avatar{width:36px;height:36px;font-size:.9rem;cursor:inherit}
+.ur.pro .avatar{background:var(--gold);color:var(--gold-ink)}
+.details{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:.9rem}
+.details dt{color:var(--muted);font-weight:700}
+.details dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.secret{margin:0;font:800 1.35rem ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;background:var(--soft);padding:12px;border-radius:12px;text-align:center;-webkit-user-select:all;user-select:all;overflow-wrap:anywhere}
+.danger{color:var(--amber-ink)}
+.pwwrap{position:relative;display:block}
+.pwwrap .inp{padding-right:72px}
+.pwwrap button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--blue-ink);font:800 .85rem var(--font);padding:8px 10px;cursor:pointer}
 
 /* tab bar */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(6px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(8px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;grid-template-columns:repeat(4,1fr)}
@@ -187,10 +221,10 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 /* sheets */
 .sheet-wrap{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .scrim{position:absolute;inset:0;background:var(--scrim)}
-.sheet{position:relative;width:100%;max-width:480px;max-height:90vh;max-height:90dvh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:10px max(20px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(20px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(20px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;gap:18px}
+.sheet{position:relative;width:100%;max-width:480px;max-height:90vh;max-height:90dvh;overflow:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:10px max(20px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(20px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(20px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)));display:grid;gap:16px}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);justify-self:center}
-.sheet-head{display:flex;justify-content:space-between;align-items:center}
-.sheet h2{font:800 1.2rem var(--font);margin:0;letter-spacing:-.02em}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sheet h2{font:800 1.2rem var(--font);margin:0;letter-spacing:-.02em;min-width:0;overflow-wrap:anywhere}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--soft);border-radius:12px;padding:4px;gap:4px}
 .seg button{border:0;background:transparent;border-radius:9px;padding:10px;font:800 .9rem var(--font);color:var(--muted);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
@@ -215,25 +249,26 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .plan span{font-size:.88rem;color:var(--ink-2);font-weight:600}
 .plan em{position:absolute;top:-10px;right:10px;font-style:normal;background:var(--green);color:var(--surface);font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px}
 .plan[aria-checked="true"]{border-color:var(--blue);background:var(--blue-soft)}
-.demo{font-size:.78rem;color:var(--muted);text-align:center;margin:0}
+.demo{font-size:.8rem;color:var(--muted);text-align:center;margin:0}
 .link{background:none;border:0;color:var(--muted);font:700 .9rem var(--font);cursor:pointer;justify-self:center;padding:6px}
 
-/* onboarding */
+/* full screens: login and first-open choice */
 .onboard{position:fixed;inset:0;z-index:60;background:var(--bg);overflow:auto;padding:calc(24px + max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px))) max(20px,max(env(safe-area-inset-right,0px),var(--safe-area-inset-right,0px))) calc(24px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))) max(20px,max(env(safe-area-inset-left,0px),var(--safe-area-inset-left,0px)))}
-.onboard .wrap{max-width:440px;margin:0 auto;display:grid;gap:16px;min-height:100%;align-content:center}
+.onboard .wrap{max-width:420px;margin:0 auto;display:grid;gap:16px;min-height:100%;align-content:center}
 .onboard h1{font:800 clamp(1.8rem,8vw,2.4rem)/1.1 var(--font);letter-spacing:-.035em;margin:12px 0 0}
 .choice{display:flex;align-items:center;gap:14px;text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:20px;padding:18px;cursor:pointer;box-shadow:var(--shadow)}
 .choice .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none}
 .choice .ic svg.i{width:24px;height:24px}
 .choice b{display:block;font-size:1.1rem;font-weight:800}
 .choice span{color:var(--muted);font-size:.92rem}
-.toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:70;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:70;max-width:calc(100% - 32px);text-align:center}
 
 @media (prefers-reduced-motion:no-preference){
   .shim,.rs-price i{animation:sh 1.4s linear infinite}
   @keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
   .sheet{animation:up .2s ease-out}
   @keyframes up{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}
+  .switch,.switch::after{transition:background-color .15s,transform .15s}
 }
 @media (min-width:900px){
   .tabbar{display:none}
@@ -269,6 +304,8 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol>
   <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M6 20h12M5 8h14M7 8l-3 6a3 3 0 0 0 6 0zM17 8l-3 6a3 3 0 0 0 6 0z"/></symbol>
   <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3.5 17 9 11.5l4 4L20.5 8"/><path d="M15 8h5.5v5.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4.3h-4.3"/></symbol>
 </svg>
 
 <header class="bar">
@@ -280,7 +317,10 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       <button type="button" data-tab="alerts">Alerts</button>
       <button type="button" data-tab="flip">Flip</button>
     </nav>
-    <button class="pro-btn" type="button" id="pro-btn"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span>Go Pro</span></button>
+    <div class="top-right">
+      <button class="pro-btn" type="button" id="pro-btn"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span>Go Pro</span></button>
+      <button class="avatar" type="button" id="acct-btn" aria-label="Your account">?</button>
+    </div>
   </div>
 </header>
 
@@ -296,8 +336,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     <div class="view" id="home-extra">
       <div class="examples" id="examples"></div>
       <p class="quiet">One search. Every site: eBay, Vinted, Facebook, Gumtree and more.</p>
-      <p class="quiet" id="free-left"></p>
-      <button class="linkbtn" type="button" id="mode-line"></button>
+      <p class="quiet" id="free-left" hidden></p>
     </div>
     <div class="view" id="results" hidden>
       <div class="sumline">
@@ -323,7 +362,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       <label class="money"><span>£</span><input class="inp" id="c-price" inputmode="decimal" placeholder="Asking price" aria-label="Asking price in pounds"></label>
       <button class="btn btn-blue btn-wide" type="submit">Check it</button>
       <p class="err" id="c-err" hidden></p>
-      <p class="quiet" id="checks-left"></p>
+      <p class="quiet" id="checks-left" hidden></p>
     </form>
     <div id="verdict"></div>
   </section>
@@ -355,6 +394,28 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     </div>
     <div class="result" id="f-result"></div>
     <p class="note" id="f-note"></p>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="view" data-view="admin" hidden>
+    <div class="vrow"><h1 class="q">Admin</h1><button class="chipbtn" type="button" id="ad-refresh"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button></div>
+    <div class="panel" id="ad-health"></div>
+    <div class="result" id="ad-stats"></div>
+    <div class="panel">
+      <p class="label">Testing</p>
+      <div class="srow">
+        <div class="grow"><b>Test as a free user</b><span>See the limits and paywall like a normal user.</span></div>
+        <button class="switch" type="button" role="switch" aria-checked="false" id="ad-free" aria-label="Test as a free user"></button>
+      </div>
+      <button class="btn btn-soft btn-wide" type="button" id="ad-reset-me">Reset my usage for today</button>
+    </div>
+    <form class="search" id="ad-search" role="search" autocomplete="off">
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="ad-q" type="search" enterkeyhint="search" placeholder="Find a user by email" aria-label="Find a user by email">
+      <button class="btn btn-blue" type="submit">Find</button>
+    </form>
+    <p class="label" id="ad-count"></p>
+    <ul class="list" id="ad-users"></ul>
   </section>
 </main>
 
@@ -404,7 +465,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       <div class="field"><p class="label">Near</p><input class="inp" id="a-loc" placeholder="Anywhere" aria-label="Town or postcode"></div>
     </div>
     <p class="err" id="a-err" hidden></p>
-    <button class="btn btn-blue btn-wide" type="submit">Save alert</button>
+    <button class="btn btn-blue btn-wide" type="submit" id="a-save">Save alert</button>
   </form>
 </div>
 
@@ -425,7 +486,44 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="p-title" id="pro-body"></div>
 </div>
 
-<!-- First open -->
+<!-- Account -->
+<div class="sheet-wrap" id="sheet-account" hidden>
+  <div class="scrim" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ac-title">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="sheet-head"><h2 id="ac-title">Account</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+    <div class="acct"><span class="avatar" id="ac-avatar" aria-hidden="true"></span><div class="grow"><b id="ac-email"></b><span class="plan-pill" id="ac-plan"></span></div></div>
+    <p class="quiet" id="ac-usage"></p>
+    <button class="btn btn-blue btn-wide" type="button" id="ac-upgrade">Upgrade to Pro</button>
+    <button class="btn btn-soft btn-wide" type="button" id="ac-manage">Manage subscription</button>
+    <button class="linkrow" type="button" id="ac-admin"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span>Admin panel</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <button class="linkrow" type="button" id="ac-mode"><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg><span id="ac-mode-txt"></span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <button class="linkrow" type="button" id="ac-pw-btn"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg><span>Change password</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <form class="panel" id="ac-pw" hidden autocomplete="off">
+      <input class="inp" id="ac-pw-cur" type="password" autocomplete="current-password" placeholder="Current password" aria-label="Current password">
+      <input class="inp" id="ac-pw-new" type="password" autocomplete="new-password" placeholder="New password (8+ characters)" aria-label="New password">
+      <button class="btn btn-blue btn-wide" type="submit">Save new password</button>
+      <p class="err" id="ac-pw-err" hidden></p>
+    </form>
+    <button class="btn btn-soft btn-wide" type="button" id="ac-logout">Log out</button>
+    <button class="link" type="button" id="ac-del-btn">Delete account</button>
+    <form class="panel" id="ac-del" hidden autocomplete="off">
+      <p class="quiet">This deletes your account, alerts and any subscription. It can’t be undone.</p>
+      <input class="inp" id="ac-del-pw" type="password" autocomplete="current-password" placeholder="Your password" aria-label="Your password">
+      <button class="btn btn-blue btn-wide" type="submit">Delete my account</button>
+      <p class="err" id="ac-del-err" hidden></p>
+    </form>
+    <p class="demo" id="ac-ver"></p>
+  </div>
+</div>
+
+<!-- Admin: one user -->
+<div class="sheet-wrap" id="sheet-user" hidden>
+  <div class="scrim" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="us-title" id="user-body"></div>
+</div>
+
+<!-- First open: pick a mode -->
 <div class="onboard" id="onboard" hidden>
   <div class="wrap">
     <div class="logo" aria-hidden="true"><span class="logo-tag"></span>ALL FOR ONE</div>
@@ -436,12 +534,40 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   </div>
 </div>
 
+<!-- Log in / sign up -->
+<div class="onboard" id="auth" hidden>
+  <div class="wrap">
+    <div class="logo" aria-hidden="true"><span class="logo-tag"></span>ALL FOR ONE</div>
+    <h1>Never overpay. Never miss a deal.</h1>
+    <div class="seg" id="auth-seg" role="group" aria-label="Account">
+      <button type="button" data-auth="signup">Create account</button>
+      <button type="button" data-auth="login">Log in</button>
+    </div>
+    <form class="stack" id="auth-form" novalidate>
+      <input class="inp" id="au-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="Email" aria-label="Email">
+      <div class="pwwrap"><input class="inp" id="au-pw" type="password" autocomplete="new-password" placeholder="Password (8+ characters)" aria-label="Password"><button type="button" id="au-show">Show</button></div>
+      <button class="btn btn-blue btn-wide" type="submit" id="au-go">Create free account</button>
+      <p class="err" id="au-err" role="alert" hidden></p>
+      <p class="quiet" id="au-note">Free: 3 searches and 3 price checks a day.</p>
+      <p class="quiet" id="au-preview" hidden>Preview inside Claude: accounts are saved on this device only.</p>
+      <div class="quiet" id="au-server" hidden>
+        Server: <b id="au-server-addr"></b> <button type="button" class="linkbtn" id="au-server-edit">Change</button>
+        <div id="au-server-form" hidden style="display:flex;gap:8px;margin-top:8px">
+          <input class="inp" id="au-server-in" type="url" placeholder="https://your-app.vercel.app" aria-label="Server address">
+          <button type="button" class="btn btn-soft" id="au-server-save">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (() => {
-  /* Set this to the live price service once it's deployed, e.g. 'https://allforone-app.vercel.app' */
-  const API_URL = '';
+  const VERSION = '0.6';
+  /* The live server the Android app talks to. */
+  const API_URL = 'https://allforone-app.vercel.app';
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
@@ -458,6 +584,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   const rangeTxt = r => r[0] === r[1] ? gbp(r[0]) : gbp(r[0]) + '–' + Number(r[1]).toLocaleString('en-GB');
   const num = v => { const n = parseFloat(String(v || '').replace(/[^\d.]/g, '')); return isFinite(n) ? n : 0; };
   const cleanNum = v => { const n = num(v); return n > 0 ? String(Math.round(n)) : ''; };
+  const dateTxt = t => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '–';
 
   /* ---------- sites ---------- */
   const SITES = {
@@ -531,61 +658,169 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     return out;
   }
 
+  /* ---------- server connection ---------- */
+  const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  function serverBase() {
+    const o = store.get('server', '');
+    if (o) return String(o).replace(/\/$/, '');
+    if (isNative) return API_URL;
+    if (location.protocol === 'file:' || window.claude || /claude/.test(location.hostname)) return null;
+    return '';
+  }
+  const PREVIEW = serverBase() === null;
+  let token = store.get('token', '');
+  let session = store.get('session', null);
+  const saveSession = () => store.set('session', session);
+  const isPro = () => !!(session && session.user && session.user.plan === 'pro');
+  const left = k => session && session.limits ? Math.max(0, (session.limits[k] || 0) - ((session.usage || {})[k] || 0)) : 0;
+
+  async function api(path, body, signal) {
+    const authCall = /^auth\?a=(login|signup)/.test(path);
+    if (PREVIEW) {
+      try { return await mockApi(path, body); }
+      catch (e) { if (e.status === 401 && token && !authCall) loggedOut('Please log in again.'); throw e; }
+    }
+    let r;
+    try {
+      r = await fetch(serverBase() + '/api/' + path, {
+        method: body ? 'POST' : 'GET', signal,
+        headers: Object.assign({ 'content-type': 'application/json' }, token ? { authorization: 'Bearer ' + token } : {}),
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      throw { status: 0, error: 'Can’t reach ALL FOR ONE. Check your internet and try again.' };
+    }
+    let data = {};
+    try { data = await r.json(); } catch (e) {}
+    if (!r.ok) {
+      const err = Object.assign({}, data, { status: r.status, error: data.error || 'Something went wrong. Try again.' });
+      if (r.status === 401 && token && !authCall) loggedOut('You were logged out. Please log in again.');
+      throw err;
+    }
+    return data;
+  }
+  function applySession(s) {
+    session = { user: s.user, usage: s.usage || { search: 0, check: 0 }, limits: s.limits || { search: 3, check: 3, alerts: 1 } };
+    saveSession(); renderAccountBits();
+  }
+  async function refreshMe() { if (!token) return; try { applySession(await api('auth?a=me')); } catch (e) {} }
+  function loggedOut(msg) {
+    token = ''; session = null; alerts = [];
+    store.set('token', ''); store.set('session', null);
+    closeSheet(); showAuth(msg);
+  }
+
+  /* ---------- preview stand-in for the server (only inside Claude) ---------- */
+  const HIDE = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
+  const sampleP = (async () => { try { return (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch (e) { return null; } })();
+  let sampleOff = false;
+  function promptFor(q, cat) {
+    const ids = CATS[cat].sites;
+    return 'You estimate typical asking prices on UK second-hand marketplaces, from general knowledge.\n'
+      + 'Item: "' + q.slice(0, 160) + '"\n'
+      + 'Marketplaces (id = name): ' + ids.map(id => id + ' = ' + SITES[id].name).join('; ') + '\n'
+      + 'Assume used condition, except cex and backmarket, which sell refurbished stock.\n'
+      + 'Reply with only one JSON object and no other text:\n'
+      + '{"typical":[low,high],"sites":{"<id>":[low,high]},"checks":["up to 2 checks before paying for this exact item, each under 10 words"]}\n'
+      + 'Prices are whole GBP numbers. Use null for a marketplace where this item rarely sells. If the item is too vague to price, set "typical" to null.';
+  }
+  async function claudeEstimate(q, cat) {
+    const sm = await sampleP;
+    if (!sm || sampleOff) return null;
+    try { return await sm.json(promptFor(q, CATS[cat] ? cat : detect(q)), { modelTier: 'quick', cache: { gcTime: 86400000 } }); }
+    catch (e) { if (HIDE.includes(e && e.code)) sampleOff = true; return null; }
+  }
+  function mockApi(path, b) {
+    return new Promise((resolve, reject) => setTimeout(() => mockRun(path, b || {}).then(resolve, reject), 150));
+  }
+  async function mockRun(path, b) {
+    const [name, qs] = path.split('?');
+    const params = new URLSearchParams(qs || ''), a = params.get('a') || '';
+    const d = store.get('mock', { users: {}, me: '' });
+    const day = new Date().toISOString().slice(0, 10);
+    const no = (status, error, extra) => { throw Object.assign({ status, error }, extra || {}); };
+    const pro = u => !u.debugFree && (u.role === 'owner' || !!u.compPro);
+    const pub = u => ({ id: u.email, email: u.email, plan: pro(u) ? 'pro' : 'free', proSource: u.debugFree ? 'testing' : u.role === 'owner' ? 'admin' : u.compPro ? 'gift' : null, isAdmin: u.role === 'owner', role: u.role, trialUsed: false, hasBilling: false, debugFree: !!u.debugFree, createdAt: u.createdAt });
+    const lim = u => pro(u) ? { search: 300, check: 150, alerts: 30 } : { search: 3, check: 3, alerts: 1 };
+    const use = u => (u.usage && u.usage.day === day) ? u.usage : (u.usage = { day, search: 0, check: 0 });
+    const st = u => ({ user: pub(u), usage: { search: use(u).search, check: use(u).check }, limits: lim(u) });
+    const me = () => d.users[d.me] || no(401, 'Please log in again.');
+    const save = out => { store.set('mock', d); return out; };
+    const email = String(b.email || '').trim().toLowerCase();
+    if (name === 'auth') {
+      if (a === 'signup') {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) no(400, 'Enter a valid email address.');
+        if (String(b.password || '').length < 8) no(400, 'Use at least 8 characters for your password.');
+        if (d.users[email]) no(409, 'That email already has an account. Log in instead.');
+        d.users[email] = { email, role: Object.keys(d.users).length ? 'user' : 'owner', createdAt: Date.now(), alerts: [] };
+        d.me = email;
+        return save(Object.assign({ token: 'preview' }, st(d.users[email])));
+      }
+      if (a === 'login') { if (!d.users[email]) no(401, 'Wrong email or password.'); d.me = email; return save(Object.assign({ token: 'preview' }, st(d.users[email]))); }
+      if (a === 'me') return save(st(me()));
+      if (a === 'logout') { d.me = ''; return save({ ok: true }); }
+      if (a === 'password') { me(); return { ok: true }; }
+      if (a === 'delete') { const u = me(); if (u.role === 'owner') no(400, 'The owner account can’t be deleted.'); delete d.users[u.email]; d.me = ''; return save({ ok: true }); }
+    }
+    if (name === 'estimate') {
+      const u = me(), k = b.kind === 'check' ? 'check' : 'search';
+      const free = b.kind === 'alert' && (u.alerts || []).some(x => x.q.toLowerCase() === String(b.q).toLowerCase());
+      if (!free) {
+        if (use(u)[k] >= lim(u)[k]) no(402, k === 'check' ? 'You’ve used today’s free price checks.' : 'You’ve used today’s free searches.', { reason: 'limit', kind: k });
+        use(u)[k]++;
+      }
+      save();
+      const usage = { search: use(u).search, check: use(u).check };
+      return Object.assign((await claudeEstimate(String(b.q), b.cat)) || { none: true }, { usage });
+    }
+    if (name === 'alerts') {
+      const u = me(); u.alerts = u.alerts || [];
+      if (a === 'add') {
+        if (u.alerts.length >= lim(u).alerts) no(402, 'Free accounts get 1 deal alert.', { reason: 'limit', kind: 'alerts' });
+        u.alerts.unshift({ id: String(Date.now()), q: String(b.q || '').slice(0, 80), max: cleanNum(b.max), loc: String(b.loc || '').slice(0, 40), created: Date.now(), checked: 0 });
+      }
+      if (a === 'remove') u.alerts = u.alerts.filter(x => x.id !== b.id);
+      if (a === 'checked') { const x = u.alerts.find(y => y.id === b.id); if (x) x.checked = Date.now(); }
+      return save({ alerts: u.alerts, limit: lim(u).alerts });
+    }
+    if (name === 'billing') { const u = me(); if (a === 'checkout') { u.compPro = true; return save({ preview: true }); } no(400, 'Not available in the preview.'); }
+    if (name === 'admin') {
+      const u = me();
+      if (u.role !== 'owner') no(403, 'Admins only.');
+      const view = x => Object.assign(pub(x), { lastSeen: x.createdAt, compPro: !!x.compPro, subStatus: null, usage: { search: use(x).search, check: use(x).check } });
+      if (a === 'health') return save({ db: true, dbKind: 'preview', prices: !!(await sampleP), payments: false, users: Object.keys(d.users).length, today: { signups: 0, searches: use(u).search, checks: use(u).check }, you: { role: 'owner' } });
+      if (a === 'users') {
+        const q = (params.get('q') || '').toLowerCase(), all = Object.values(d.users);
+        return save({ total: all.length, pro: all.filter(pro).length, users: all.filter(x => x.email.includes(q)).map(view) });
+      }
+      if (a === 'user') {
+        const t = d.users[b.id] || no(404, 'User not found.');
+        if (b.action === 'grant_pro') t.compPro = true;
+        else if (b.action === 'revoke_pro') t.compPro = false;
+        else if (b.action === 'reset_usage') t.usage = null;
+        else if (b.action === 'test_free') { if (t !== u) no(400, 'You can only switch this for your own account.'); t.debugFree = !!b.on; }
+        else if (b.action === 'delete') { if (t.role === 'owner') no(400, 'The owner account can’t be deleted.'); delete d.users[t.email]; return save({ deleted: true }); }
+        else no(400, 'Not available in the preview.');
+        return save({ user: view(t) });
+      }
+    }
+    no(404, 'Not found.');
+  }
+
   /* ---------- state ---------- */
   const state = Object.assign({ q: '', min: '', max: '', loc: '', radius: '25', sort: 'cheap' }, store.get('last', {}));
   if (!['5', '10', '25', '50', '0'].includes(state.radius)) state.radius = '25';
   if (!['cheap', 'new'].includes(state.sort)) state.sort = 'cheap';
+  state.q = '';
   let mode = store.get('mode', null);
   const cur = () => Object.assign({}, state, { cat: detect(state.q) });
   const persist = () => store.set('last', state);
   const priceLabel = s => s.min && s.max ? `£${s.min}–£${s.max}` : s.max ? `Under £${s.max}` : s.min ? `Over £${s.min}` : '';
 
-  /* ---------- Pro (demo subscription) + free limits ---------- */
-  const FREE = { search: 3, check: 3, alerts: 1 };
-  const PLANS = { year: { label: 'Yearly', price: '£29.99/year', save: 'Save 50%' }, month: { label: 'Monthly', price: '£4.99/month' } };
-  let pro = !!store.get('pro', false), plan = 'year', proReason = 'upgrade', pendingTab = null;
-  const today = () => new Date().toISOString().slice(0, 10);
-  const usage = () => { const u = store.get('usage', {}); return u.day === today() ? u : { day: today(), search: 0, check: 0 }; };
-  const left = k => Math.max(0, FREE[k] - (usage()[k] || 0));
-  const spend = k => { if (pro) return; const u = usage(); u[k] = (u[k] || 0) + 1; store.set('usage', u); };
-  function renderCounters() {
-    $('#pro-btn span').textContent = pro ? 'Pro' : 'Go Pro';
-    const s = left('search'), c = left('check');
-    $('#free-left').hidden = pro; $('#free-left').innerHTML = `<b>${s}</b> free ${s === 1 ? 'search' : 'searches'} left today`;
-    $('#checks-left').hidden = pro; $('#checks-left').innerHTML = `<b>${c}</b> free ${c === 1 ? 'check' : 'checks'} left today`;
-  }
-  function renderPro() {
-    const body = $('#pro-body'), tick = `<span class="tick">${icon('check')}</span>`;
-    if (pro) {
-      body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
-        <div class="pro-head"><h2 id="p-title">You're on Pro</h2><p>Unlimited searches, price checks and deal alerts.</p></div>
-        <button class="btn btn-blue btn-wide" type="button" data-close>Done</button>
-        <p class="demo">Demo mode.</p><button class="link" type="button" id="go-free">Switch back to free (demo)</button>`;
-      return;
-    }
-    const titles = {
-      search: ['You\'ve used today\'s free searches', 'Search as much as you like with Pro.'],
-      check: ['You\'ve used today\'s free price checks', 'Never overpay again. Check every deal with Pro.'],
-      alerts: ['Get more deal alerts with Pro', 'Set alerts for everything you\'re hunting.'],
-      upgrade: ['Get ALL FOR ONE Pro', 'Never overpay. Never miss a deal.'] };
-    const [h, p] = titles[proReason] || titles.upgrade;
-    body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
-      <div class="pro-head"><h2 id="p-title">${esc(h)}</h2><p>${esc(p)}</p></div>
-      <ul class="perks"><li>${tick}Unlimited price checks</li><li>${tick}Unlimited searches</li><li>${tick}Deal alerts for anything you want</li></ul>
-      <div class="plans" role="radiogroup" aria-label="Plan">${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="plan" role="radio" data-plan="${k}" aria-checked="${k === plan}"><b>${v.label}</b><span>${v.price}</span>${v.save ? `<em>${v.save}</em>` : ''}</button>`).join('')}</div>
-      <button class="btn btn-blue btn-wide" type="button" id="trial-btn">Start 7-day free trial</button>
-      <p class="demo">Then ${PLANS[plan].price}. Cancel anytime.<br>Demo: no payment is taken.</p>
-      <button class="link" type="button" data-close>Not now</button>`;
-  }
-  function openPro(reason) { proReason = reason || 'upgrade'; renderPro(); openSheet('pro'); }
-  $('#pro-body').addEventListener('click', e => {
-    const pl = e.target.closest('[data-plan]'); if (pl) { plan = pl.dataset.plan; renderPro(); return; }
-    if (e.target.closest('#trial-btn')) { pro = true; store.set('pro', true); closeSheet(); renderCounters(); toast('Pro unlocked (demo)'); if (pendingTab) { const t = pendingTab; pendingTab = null; t(); } return; }
-    if (e.target.closest('#go-free')) { pro = false; store.set('pro', false); closeSheet(); renderCounters(); toast('Back on free'); }
-  });
-  $('#pro-btn').addEventListener('click', () => openPro('upgrade'));
-
-  /* ---------- sheets + toast ---------- */
+  /* ---------- toast + sheets ---------- */
+  let toastT;
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200); }
   let openId = null, lastFocus = null;
   function openSheet(id) {
     if (openId) $('#sheet-' + openId).hidden = true;
@@ -597,83 +832,233 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     if (!openId) return;
     const was = openId; $('#sheet-' + openId).hidden = true; openId = null;
     if (was === 'filters') { if (state.min && state.max && +state.min > +state.max) { const m = state.min; state.min = state.max; state.max = m; } persist(); renderResults(); }
+    if (was === 'pro' && !awaitingPay) pending = null;
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); lastFocus = null;
   }
   $$('.sheet-wrap').forEach(w => w.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeSheet(); }));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-  let toastT;
-  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 1800); }
+  function copyText(text, btn) {
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); };
+    try { navigator.clipboard.writeText(text).then(done, () => selectSecret()); } catch (e) { selectSecret(); }
+  }
+  function selectSecret() { const el = $('#us-temp'); if (!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Press and hold to copy'); }
 
   /* ---------- tabs ---------- */
-  function show(tab) {
-    $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== tab; });
-    $$('[data-tab]').forEach(b => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
-    if (tab === 'alerts') renderAlerts();
-    if (tab === 'flip') renderFlip();
+  let tab = 'search';
+  function show(t) {
+    tab = t;
+    $$('[data-view]').forEach(v => { v.hidden = v.dataset.view !== t; });
+    $$('[data-tab]').forEach(b => b.setAttribute('aria-current', b.dataset.tab === t ? 'page' : 'false'));
+    if (t === 'alerts') loadAlerts();
+    if (t === 'flip') renderFlip();
+    if (t === 'admin') loadAdmin();
     window.scrollTo(0, 0);
   }
   $$('[data-tab]').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
 
-  /* ---------- price estimates: price service, else Claude, else none ---------- */
-  const HIDE = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'];
-  const sampleP = (async () => { try { return (window.claude && window.claude.use) ? await window.claude.use('sample') : null; } catch (e) { return null; } })();
-  let sampleOff = false;
-  const cache = new Map();
-  const strs = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim().slice(0, 100)) : [];
-  const rng = v => (Array.isArray(v) && v.length >= 2 && typeof v[0] === 'number' && typeof v[1] === 'number' && isFinite(v[0]) && isFinite(v[1]) && Math.max(v[0], v[1]) > 0)
-    ? [Math.max(0, Math.round(Math.min(v[0], v[1]))), Math.round(Math.max(v[0], v[1]))] : null;
-  function promptFor(q, cat) {
-    const ids = CATS[cat].sites;
-    return 'You estimate typical asking prices on UK second-hand marketplaces, from general knowledge.\n'
-      + 'Item: "' + q.slice(0, 160) + '"\n'
-      + 'Marketplaces (id = name): ' + ids.map(id => id + ' = ' + SITES[id].name).join('; ') + '\n'
-      + 'Assume used condition, except cex and backmarket, which sell refurbished stock.\n'
-      + 'Reply with only one JSON object and no other text:\n'
-      + '{"typical":[low,high],"sites":{"<id>":[low,high]},"checks":["up to 2 checks before paying for this exact item, each under 10 words"]}\n'
-      + 'Prices are whole GBP numbers. Use null for a marketplace where this item rarely sells. If the item is too vague to price, set "typical" to null.';
+  /* ---------- account bits ---------- */
+  const proLabel = u => u.plan === 'pro' ? ({ admin: 'Pro · admin', gift: 'Pro · gift', trial: 'Pro · free trial', subscription: 'Pro' }[u.proSource] || 'Pro') : (u.debugFree ? 'Free · testing' : 'Free');
+  function renderAccountBits() {
+    const u = session && session.user;
+    $('#acct-btn').textContent = u ? u.email.charAt(0).toUpperCase() : '?';
+    $('#pro-btn span').textContent = isPro() ? 'Pro' : 'Go Pro';
+    renderCounters();
   }
-  function apiBase() {
-    if (API_URL) return API_URL.replace(/\/$/, '');
-    if (/^https?:$/.test(location.protocol) && !/^(localhost|127\.|10\.|192\.168\.)/.test(location.hostname) && !window.claude) return '';
-    return null;
+  function renderCounters() {
+    const p = isPro() || !session, s = left('search'), c = left('check');
+    $('#free-left').hidden = p; $('#free-left').innerHTML = `<b>${s}</b> free ${s === 1 ? 'search' : 'searches'} left today`;
+    $('#checks-left').hidden = p; $('#checks-left').innerHTML = `<b>${c}</b> free ${c === 1 ? 'check' : 'checks'} left today`;
   }
-  function tidy(r, cat) {
-    const o = { typical: rng(r && r.typical), sites: {}, checks: strs(r && r.checks).slice(0, 2) };
-    if (r && r.sites && typeof r.sites === 'object') for (const id of CATS[cat].sites) { const v = rng(r.sites[id]); if (v) o.sites[id] = v; }
-    if (!o.typical && !Object.keys(o.sites).length) o.vague = true;
-    return o;
+
+  /* ---------- paywall ---------- */
+  const PLANS = { year: { label: 'Yearly', price: '£29.99/year', save: 'Save 50%' }, month: { label: 'Monthly', price: '£4.99/month' } };
+  let plan = 'year', proReason = 'upgrade', pending = null, awaitingPay = false;
+  function renderPro(msg) {
+    const body = $('#pro-body'), tick = `<span class="tick">${icon('check')}</span>`, u = session && session.user;
+    const err = `<p class="err" id="pro-err"${msg ? '' : ' hidden'}>${esc(msg || '')}</p>`;
+    if (isPro()) {
+      body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
+        <div class="pro-head"><h2 id="p-title">You’re on Pro</h2><p>${esc(proLabel(u))}. Unlimited searches, price checks and deal alerts.</p></div>
+        ${u.hasBilling ? '<button class="btn btn-soft btn-wide" type="button" id="pro-manage">Manage subscription</button>' : ''}
+        <button class="btn btn-blue btn-wide" type="button" data-close>Done</button>${err}`;
+      return;
+    }
+    const titles = {
+      search: ['You’ve used today’s free searches', 'Search as much as you like with Pro.'],
+      check: ['You’ve used today’s free price checks', 'Never overpay again. Check every deal with Pro.'],
+      alerts: ['Get more deal alerts with Pro', 'Set alerts for everything you’re hunting.'],
+      upgrade: ['Get ALL FOR ONE Pro', 'Never overpay. Never miss a deal.'] };
+    const [h, p] = titles[proReason] || titles.upgrade;
+    const trial = !(u && u.trialUsed);
+    body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
+      <div class="pro-head"><h2 id="p-title">${esc(h)}</h2><p>${esc(p)}</p></div>
+      <ul class="perks"><li>${tick}Unlimited price checks</li><li>${tick}Unlimited searches</li><li>${tick}Up to 30 deal alerts</li></ul>
+      <div class="plans" role="radiogroup" aria-label="Plan">${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="plan" role="radio" data-plan="${k}" aria-checked="${k === plan}"><b>${v.label}</b><span>${v.price}</span>${v.save ? `<em>${v.save}</em>` : ''}</button>`).join('')}</div>
+      <button class="btn btn-blue btn-wide" type="button" id="trial-btn">${trial ? 'Start 7-day free trial' : 'Subscribe'}</button>
+      <p class="demo">${trial ? `Free for 7 days, then ${PLANS[plan].price}. Card needed. Cancel before day 8 and you won’t pay.` : `${PLANS[plan].price}. Cancel any time.`}${PREVIEW ? '<br>Preview: no payment is taken.' : ''}</p>
+      ${err}
+      <button class="link" type="button" data-close>Not now</button>`;
   }
-  /* resolves {typical, sites, checks} | {vague} | {none} */
-  function getEstimate(q, signal) {
-    const cat = detect(q), key = q.toLowerCase().trim() + '|' + cat;
-    if (cache.has(key)) return cache.get(key);
-    const p = (async () => {
-      const base = apiBase();
-      if (base !== null) {
-        try {
-          const res = await fetch(base + '/api/estimate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ q, cat, sites: CATS[cat].sites }), signal });
-          if (res.ok) return tidy(await res.json(), cat);
-        } catch (e) { if (e && e.name === 'AbortError') throw e; }
+  function openPro(reason, after) { proReason = reason || 'upgrade'; pending = after || null; renderPro(); openSheet('pro'); }
+  function runPending() { const f = pending; pending = null; if (f) f(); }
+  function openExternal(url) { window.location.href = url; }
+  async function startCheckout(btn) {
+    btn.disabled = true; btn.textContent = 'Opening secure checkout…';
+    try {
+      const r = await api('billing?a=checkout', { plan });
+      if (r.preview) { await refreshMe(); closeSheet(); toast('Preview: Pro switched on'); runPending(); return; }
+      awaitingPay = true;
+      openExternal(r.url);
+      btn.disabled = false; btn.textContent = 'Waiting for payment…';
+    } catch (e) { renderPro(e.error); }
+  }
+  async function openPortal(btn) {
+    if (btn) btn.disabled = true;
+    try { const r = await api('billing?a=portal', {}); openExternal(r.url); }
+    catch (e) { toast(e.error); }
+    finally { if (btn) btn.disabled = false; }
+  }
+  $('#pro-body').addEventListener('click', e => {
+    const pl = e.target.closest('[data-plan]'); if (pl) { plan = pl.dataset.plan; renderPro(); return; }
+    const t = e.target.closest('#trial-btn'); if (t) { startCheckout(t); return; }
+    const m = e.target.closest('#pro-manage'); if (m) openPortal(m);
+  });
+  $('#pro-btn').addEventListener('click', () => isPro() ? openAccount() : openPro('upgrade'));
+  function blocked(e, retry) {
+    if (!e || e.status !== 402) return false;
+    if (isPro()) toast(e.error); else openPro(e.kind === 'check' ? 'check' : e.kind === 'alerts' ? 'alerts' : 'search', retry);
+    refreshMe();
+    return true;
+  }
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible' || !token) return;
+    const wasPro = isPro();
+    await refreshMe();
+    if (!wasPro && isPro()) { closeSheet(); awaitingPay = false; toast('You’re on Pro'); runPending(); }
+  });
+
+  /* ---------- account sheet ---------- */
+  function openAccount() {
+    if (!session) return;
+    const u = session.user;
+    $('#ac-avatar').textContent = u.email.charAt(0).toUpperCase();
+    $('#ac-email').textContent = u.email;
+    const pill = $('#ac-plan'); pill.textContent = proLabel(u); pill.className = 'plan-pill' + (u.plan === 'pro' ? ' pro' : '');
+    $('#ac-usage').innerHTML = isPro() ? 'Unlimited searches and price checks.' : `Today: <b>${left('search')}</b> of ${session.limits.search} searches and <b>${left('check')}</b> of ${session.limits.check} price checks left.`;
+    $('#ac-upgrade').hidden = isPro();
+    $('#ac-manage').hidden = !u.hasBilling;
+    $('#ac-admin').hidden = !u.isAdmin;
+    $('#ac-mode-txt').textContent = mode === 'flip' ? 'Flipping mode · switch to bargains' : 'Bargain mode · switch to flipping';
+    ['#ac-pw', '#ac-del', '#ac-pw-err', '#ac-del-err'].forEach(s => { $(s).hidden = true; });
+    $('#ac-ver').textContent = 'Version ' + VERSION + (PREVIEW ? ' · preview' : ' · ' + (serverBase() || location.host).replace(/^https?:\/\//, ''));
+    openSheet('account');
+  }
+  $('#acct-btn').addEventListener('click', openAccount);
+  $('#ac-upgrade').addEventListener('click', () => openPro('upgrade'));
+  $('#ac-manage').addEventListener('click', e => openPortal(e.currentTarget));
+  $('#ac-admin').addEventListener('click', () => { closeSheet(); show('admin'); });
+  $('#ac-mode').addEventListener('click', () => { setMode(mode === 'flip' ? 'shop' : 'flip'); closeSheet(); toast(mode === 'flip' ? 'Flipping mode' : 'Bargain mode'); });
+  $('#ac-pw-btn').addEventListener('click', () => { const f = $('#ac-pw'); f.hidden = !f.hidden; if (!f.hidden) $('#ac-pw-cur').focus(); });
+  $('#ac-pw').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#ac-pw-err'), btn = e.currentTarget.querySelector('button');
+    btn.disabled = true;
+    try { await api('auth?a=password', { current: $('#ac-pw-cur').value, next: $('#ac-pw-new').value }); $('#ac-pw-cur').value = ''; $('#ac-pw-new').value = ''; $('#ac-pw').hidden = true; toast('Password changed'); }
+    catch (x) { err.textContent = x.error; err.hidden = false; }
+    finally { btn.disabled = false; }
+  });
+  $('#ac-logout').addEventListener('click', async () => { try { await api('auth?a=logout', {}); } catch (e) {} loggedOut(); });
+  $('#ac-del-btn').addEventListener('click', () => { $('#ac-del').hidden = false; $('#ac-del-pw').focus(); });
+  $('#ac-del').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('#ac-del-err'), btn = e.currentTarget.querySelector('button');
+    btn.disabled = true;
+    try { await api('auth?a=delete', { password: $('#ac-del-pw').value }); $('#ac-del-pw').value = ''; store.set('hasAccount', false); loggedOut(); toast('Account deleted'); }
+    catch (x) { err.textContent = x.error; err.hidden = false; }
+    finally { btn.disabled = false; }
+  });
+
+  /* ---------- log in / sign up ---------- */
+  let authMode = 'signup';
+  function setAuthMode(m) {
+    authMode = m;
+    $$('#auth-seg [data-auth]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.auth === m)));
+    $('#au-go').textContent = m === 'signup' ? 'Create free account' : 'Log in';
+    $('#au-pw').setAttribute('autocomplete', m === 'signup' ? 'new-password' : 'current-password');
+    $('#au-pw').placeholder = m === 'signup' ? 'Password (8+ characters)' : 'Password';
+    $('#au-note').hidden = m !== 'signup';
+    $('#au-err').hidden = true;
+  }
+  function showAuth(msg) {
+    $('#auth').hidden = false; $('#onboard').hidden = true;
+    setAuthMode(store.get('hasAccount', false) ? 'login' : 'signup');
+    if (msg) { $('#au-err').textContent = msg; $('#au-err').hidden = false; }
+    $('#au-preview').hidden = !PREVIEW;
+    $('#au-server').hidden = true;
+  }
+  $('#auth-seg').addEventListener('click', e => { const b = e.target.closest('[data-auth]'); if (b) setAuthMode(b.dataset.auth); });
+  $('#au-show').addEventListener('click', () => { const p = $('#au-pw'), show = p.type === 'password'; p.type = show ? 'text' : 'password'; $('#au-show').textContent = show ? 'Hide' : 'Show'; });
+  $('#auth-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = $('#au-email').value.trim(), password = $('#au-pw').value, err = $('#au-err'), go = $('#au-go');
+    if (!email || !password) { err.textContent = 'Enter your email and password.'; err.hidden = false; return; }
+    go.disabled = true; go.textContent = authMode === 'signup' ? 'Creating your account…' : 'Logging in…'; err.hidden = true;
+    try {
+      const r = await api('auth?a=' + authMode, { email, password });
+      token = r.token; store.set('token', token); store.set('hasAccount', true);
+      applySession(r);
+      $('#au-pw').value = '';
+      enterApp();
+      toast(authMode === 'signup' ? (r.user.isAdmin ? 'Account created. You’re the admin.' : 'Welcome to ALL FOR ONE') : 'Welcome back');
+    } catch (x) {
+      err.textContent = x.error; err.hidden = false;
+      if (!PREVIEW && (x.status === 0 || x.status === 404 || x.status >= 500)) {
+        $('#au-server-addr').textContent = (serverBase() || location.host).replace(/^https?:\/\//, '');
+        $('#au-server').hidden = false;
       }
-      const sm = await sampleP;
-      if (!sm || sampleOff) return { none: true };
-      try { return tidy(await sm.json(promptFor(q, cat), { modelTier: 'quick', signal, cache: { gcTime: 86400000 } }), cat); }
-      catch (e) { if (e && e.code === 'cancelled') throw e; if (HIDE.includes(e && e.code)) sampleOff = true; return { none: true }; }
-    })();
-    cache.set(key, p); p.catch(() => cache.delete(key));
-    return p;
+    } finally { go.disabled = false; go.textContent = authMode === 'signup' ? 'Create free account' : 'Log in'; }
+  });
+  $('#au-server-edit').addEventListener('click', () => { $('#au-server-form').hidden = false; $('#au-server-in').value = serverBase() || ''; $('#au-server-in').focus(); });
+  $('#au-server-save').addEventListener('click', () => {
+    let v = $('#au-server-in').value.trim().replace(/\/$/, '');
+    if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v;
+    store.set('server', v);
+    $('#au-server-addr').textContent = (serverBase() || location.host).replace(/^https?:\/\//, '');
+    $('#au-server-form').hidden = true; toast('Server saved. Try again.');
+  });
+
+  let entered = false;
+  function enterApp() {
+    $('#auth').hidden = true;
+    if (!mode) $('#onboard').hidden = false;
+    renderHome(); renderAccountBits();
+    if (!entered) { entered = true; show('search'); }
+    renderResults();
   }
 
   /* ---------- SEARCH ---------- */
   const qEl = $('#q');
   const EXAMPLES = { shop: ['PS5', 'Air Force 1 size 9', 'iPhone 13', 'Sofa under £100'], flip: ['Nike Dunk Low', 'AirPods Pro', 'North Face jacket', 'Nintendo Switch'] };
   let est = null, estKey = '', estCtl = null;
+  const strs = a => Array.isArray(a) ? a.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim().slice(0, 100)) : [];
+  const rng = v => (Array.isArray(v) && v.length >= 2 && typeof v[0] === 'number' && typeof v[1] === 'number' && isFinite(v[0]) && isFinite(v[1]) && Math.max(v[0], v[1]) > 0)
+    ? [Math.max(0, Math.round(Math.min(v[0], v[1]))), Math.round(Math.max(v[0], v[1]))] : null;
+  function tidy(r, cat) {
+    const o = { typical: rng(r && r.typical), sites: {}, checks: strs(r && r.checks).slice(0, 2) };
+    if (r && r.sites && typeof r.sites === 'object') for (const id of CATS[cat].sites) { const v = rng(r.sites[id]); if (v) o.sites[id] = v; }
+    if (!o.typical && !Object.keys(o.sites).length) o.vague = true;
+    return o;
+  }
+  async function fetchEstimate(q, kind, signal) {
+    const cat = detect(q);
+    const r = await api('estimate', { q, cat, sites: CATS[cat].sites, kind }, signal);
+    if (r.usage && session) { session.usage = r.usage; saveSession(); renderCounters(); }
+    return r.none ? { none: true } : tidy(r, cat);
+  }
   function renderHome() {
     $('#search-title').textContent = mode === 'flip' ? 'What are you flipping?' : 'What are you looking for?';
     $('#examples').innerHTML = (EXAMPLES[mode] || EXAMPLES.shop).map(x => `<button type="button" class="ex" data-ex="${esc(x)}">${esc(x)}</button>`).join('');
-    $('#mode-line').textContent = mode === 'flip' ? 'Flipping mode · switch to bargain hunting' : 'Bargain mode · switch to flipping';
   }
-  $('#mode-line').addEventListener('click', () => { setMode(mode === 'flip' ? 'shop' : 'flip'); toast(mode === 'flip' ? 'Flipping mode' : 'Bargain mode'); });
   function renderResults() {
     const s = cur(), has = !!s.q;
     $('#search-title').hidden = has; $('#home-extra').hidden = has; $('#results').hidden = !has;
@@ -703,17 +1088,25 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
         <a class="open" href="${esc(site.url(s))}" target="_blank" rel="noopener" aria-label="Open ${esc(site.name)} listings">Open${icon('arrow')}</a></li>`;
     }).join('');
   }
-  async function loadEstimate() {
+  async function loadEstimate(kind, retry) {
     const s = cur(); if (!s.q) return;
-    const key = s.q.toLowerCase(); if (estKey === key && est) { renderResults(); return; }
-    if (estCtl) estCtl.abort(); const ctl = estCtl = new AbortController();
-    estKey = key; est = null; renderResults();
-    try { const r = await getEstimate(s.q, ctl.signal); if (ctl !== estCtl) return; est = r; } catch (e) { return; }
+    if (estCtl) estCtl.abort();
+    const ctl = estCtl = new AbortController();
+    estKey = s.q.toLowerCase(); est = null; renderResults();
+    try { const r = await fetchEstimate(s.q, kind, ctl.signal); if (ctl !== estCtl) return; est = r; }
+    catch (e) {
+      if (ctl !== estCtl || (e && e.name === 'AbortError')) return;
+      if (e.status === 402) { state.q = ''; persist(); renderResults(); blocked(e, retry); return; }
+      if (e.status === 401) return;
+      est = { none: true }; if (e.error) toast(e.error);
+    }
     renderResults();
   }
-  function runSearch(raw, preset, free) {
+  function runSearch(raw, preset, kind) {
+    kind = kind || 'search';
     raw = (raw || '').trim(); if (!raw) { qEl.focus(); return; }
-    if (!free && !pro && left('search') <= 0) { pendingTab = () => runSearch(raw, preset, free); openPro('search'); return; }
+    const retry = () => runSearch(raw, preset, kind);
+    if (kind === 'search' && !isPro() && left('search') <= 0) { qEl.value = raw; openPro('search', retry); return; }
     if (preset) Object.assign(state, preset);
     else {
       const p = parse(raw);
@@ -721,9 +1114,8 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       state.q = p.q || raw;
       if (state.min && state.max && +state.min > +state.max) { const m = state.min; state.min = state.max; state.max = m; }
     }
-    if (!free) spend('search');
-    renderCounters(); qEl.value = state.q; qEl.blur(); persist();
-    show('search'); renderResults(); loadEstimate();
+    qEl.value = state.q; qEl.blur(); persist();
+    show('search'); renderResults(); loadEstimate(kind, retry);
   }
   $('#search-form').addEventListener('submit', e => { e.preventDefault(); runSearch(qEl.value); });
   $('#examples').addEventListener('click', e => { const b = e.target.closest('[data-ex]'); if (b) runSearch(b.dataset.ex); });
@@ -749,7 +1141,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     $('#min').value = state.min; $('#max').value = state.max; $('#loc').value = state.loc;
     $('#price-pills').innerHTML = PRICE_PILLS.map(v => `<button type="button" class="pill" data-maxp="${v}" aria-pressed="${!state.min && state.max === v}">Under £${v}</button>`).join('');
     $('#dist-pills').innerHTML = DIST.map(([v, l]) => `<button type="button" class="pill" data-dist="${v}" aria-pressed="${state.radius === v}">${l}</button>`).join('');
-    $$('#sort-seg [data-sort]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sort === state.sort));
+    $$('#sort-seg [data-sort]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === state.sort)));
   }
   $('#filters-btn').addEventListener('click', () => { syncFilters(); openSheet('filters'); });
   $('#sheet-filters').addEventListener('click', e => {
@@ -781,7 +1173,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   let checkCtl = null;
   function verdictFor(price, typ) {
     const [lo, hi] = typ, mid = (lo + hi) / 2;
-    if (price < lo * 0.6) return { cls: 'v-sus', label: 'Too good to be true?', line: `That's far below the usual price. Check carefully for a scam or a fake.` };
+    if (price < lo * 0.6) return { cls: 'v-sus', label: 'Too good to be true?', line: 'That’s far below the usual price. Check carefully for a scam or a fake.' };
     if (price <= lo) return { cls: 'v-good', label: 'Great deal', line: `About ${gbp(Math.round(mid - price))} less than usual.` };
     if (price <= hi) return { cls: 'v-fair', label: 'Fair price', line: price <= mid ? 'Right in the normal range, on the cheaper side.' : 'In the normal range. You could try offering a little less.' };
     return { cls: 'v-high', label: 'Overpriced', line: `About ${gbp(Math.round(price - hi))} more than the usual top price. Try an offer, or look elsewhere.` };
@@ -798,7 +1190,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       const v = verdictFor(price, e.typical);
       head = `<div class="verdict"><span class="vpill ${v.cls}">${v.label}</span><span class="big">${esc(gbp(price))}</span><p>Usually ${esc(rangeTxt(e.typical))} used${url ? ' · ' + esc(siteOf(url)) : ''}. ${esc(v.line)}</p>${acts}</div>`;
     } else if (e.vague) head = `<div class="verdict"><span class="vpill v-none">Need more detail</span><p>Add the model, size or storage (like "iPhone 13 128GB") for a verdict.</p>${acts}</div>`;
-    else head = `<div class="verdict"><span class="vpill v-none">Live checks coming soon</span><p>Instant verdicts switch on in the next update. For now, compare with what it actually sold for.</p>${acts}</div>`;
+    else head = `<div class="verdict"><span class="vpill v-none">Verdicts switching on soon</span><p>Instant verdicts aren’t live yet. For now, compare with what it actually sold for.</p>${acts}</div>`;
     $('#verdict').innerHTML = head + (e ? flags : '');
     const f = $('#v-find'); if (f) f.onclick = () => runSearch(item);
     const fl = $('#v-flip'); if (fl) fl.onclick = () => { flip.item = item; flip.buy = String(price); flip.sell = e && e.typical ? String(Math.round((e.typical[0] + e.typical[1]) / 2)) : ''; saveFlip(); show('flip'); };
@@ -810,42 +1202,68 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     if (!item) { err.textContent = 'Type what it is, like "PS5 Slim" or "AirPods Pro 2".'; err.hidden = false; $('#c-item').focus(); return; }
     if (!(price > 0)) { err.textContent = 'Add the asking price.'; err.hidden = false; $('#c-price').focus(); return; }
     err.hidden = true; $('#c-item').value = item;
-    if (!pro && left('check') <= 0) { openPro('check'); return; }
-    spend('check'); renderCounters(); document.activeElement && document.activeElement.blur();
-    if (checkCtl) checkCtl.abort(); const ctl = checkCtl = new AbortController();
+    const retry = () => $('#check-form').requestSubmit();
+    if (!isPro() && left('check') <= 0) { openPro('check', retry); return; }
+    if (document.activeElement) document.activeElement.blur();
+    if (checkCtl) checkCtl.abort();
+    const ctl = checkCtl = new AbortController();
     renderVerdict(item, price, url, null);
-    let e; try { e = await getEstimate(item, ctl.signal); } catch (x) { return; }
+    let e;
+    try { e = await fetchEstimate(item, 'check', ctl.signal); }
+    catch (x) {
+      if (ctl !== checkCtl || (x && x.name === 'AbortError')) return;
+      if (blocked(x, retry)) { $('#verdict').innerHTML = ''; return; }
+      if (x.status === 401) return;
+      e = { none: true }; if (x.error) toast(x.error);
+    }
     if (ctl !== checkCtl) return;
     renderVerdict(item, price, url, e);
     $('#verdict').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
   /* ---------- ALERTS ---------- */
-  let alerts = store.get('alerts', []);
+  let alerts = [];
   const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
+  async function loadAlerts() {
+    renderAlerts();
+    try { alerts = (await api('alerts')).alerts || []; } catch (e) { if (e.status === 0) toast(e.error); }
+    renderAlerts();
+  }
   function renderAlerts() {
     const el = $('#alerts');
-    if (!alerts.length) { el.innerHTML = '<li class="empty">No alerts yet. Add the things you\'re hunting for.</li>'; return; }
-    el.innerHTML = alerts.map((a, i) => `<li class="al"><span class="bell">${icon('bell')}</span><div class="grow"><b>${esc(a.q)}</b><span>${esc([a.max ? 'Under £' + a.max : 'Any price', a.loc || 'Anywhere'].join(' · '))}${a.checked ? ' · checked ' + ago(a.checked) : ''}</span></div>
-      <button type="button" class="btn btn-blue" data-run="${i}">Check</button><button type="button" class="x" data-del="${i}" aria-label="Delete alert for ${esc(a.q)}">×</button></li>`).join('');
+    if (!alerts.length) { el.innerHTML = '<li class="empty">No alerts yet. Add the things you’re hunting for.</li>'; return; }
+    el.innerHTML = alerts.map(a => `<li class="al"><span class="bell">${icon('bell')}</span><div class="grow"><b>${esc(a.q)}</b><span>${esc([a.max ? 'Under £' + a.max : 'Any price', a.loc || 'Anywhere'].join(' · '))}${a.checked ? ' · checked ' + ago(a.checked) : ''}</span></div>
+      <button type="button" class="btn btn-blue" data-run="${esc(a.id)}">Check</button><button type="button" class="x" data-del="${esc(a.id)}" aria-label="Delete alert for ${esc(a.q)}">×</button></li>`).join('');
   }
   function openAlertForm(pre) {
-    if (!pro && alerts.length >= FREE.alerts) { pendingTab = () => openAlertForm(pre); openPro('alerts'); return; }
-    $('#a-item').value = pre ? pre.q : ''; $('#a-max').value = pre ? pre.max || '' : ''; $('#a-loc').value = pre ? pre.loc || '' : ''; $('#a-err').hidden = true;
+    if (session && !isPro() && alerts.length >= session.limits.alerts) { openPro('alerts', () => openAlertForm(pre)); return; }
+    $('#a-item').value = pre ? pre.q || '' : ''; $('#a-max').value = pre ? pre.max || '' : ''; $('#a-loc').value = pre ? pre.loc || '' : ''; $('#a-err').hidden = true;
     openSheet('alert');
   }
   $('#new-alert').addEventListener('click', () => openAlertForm(null));
-  $('#alert-btn').addEventListener('click', () => openAlertForm({ q: state.q, max: state.max, loc: state.loc }));
-  $('#alert-form').addEventListener('submit', e => {
+  $('#alert-btn').addEventListener('click', async () => { if (!alerts.length) { try { alerts = (await api('alerts')).alerts || []; } catch (e) {} } openAlertForm({ q: state.q, max: state.max, loc: state.loc }); });
+  $('#alert-form').addEventListener('submit', async e => {
     e.preventDefault();
-    const q = $('#a-item').value.trim(); if (!q) { $('#a-err').textContent = 'Say what you want, like "PS5 Slim".'; $('#a-err').hidden = false; return; }
-    alerts.unshift({ q: q.slice(0, 80), max: cleanNum($('#a-max').value), loc: $('#a-loc').value.trim().slice(0, 40), created: Date.now(), checked: 0 });
-    store.set('alerts', alerts); closeSheet(); toast('Alert saved'); show('alerts');
+    const pre = { q: $('#a-item').value.trim(), max: cleanNum($('#a-max').value), loc: $('#a-loc').value.trim() };
+    const err = $('#a-err'), btn = $('#a-save');
+    if (!pre.q) { err.textContent = 'Say what you want, like "PS5 Slim".'; err.hidden = false; return; }
+    btn.disabled = true;
+    try { alerts = (await api('alerts?a=add', pre)).alerts; closeSheet(); toast('Alert saved'); show('alerts'); }
+    catch (x) { if (!blocked(x, () => openAlertForm(pre))) { err.textContent = x.error; err.hidden = false; } }
+    finally { btn.disabled = false; }
   });
-  $('#alerts').addEventListener('click', e => {
+  $('#alerts').addEventListener('click', async e => {
     const r = e.target.closest('[data-run]'), d = e.target.closest('[data-del]');
-    if (r) { const a = alerts[+r.dataset.run]; a.checked = Date.now(); store.set('alerts', alerts); runSearch(a.q, { q: a.q, min: '', max: a.max, loc: a.loc, sort: 'new' }, true); }
-    if (d) { alerts.splice(+d.dataset.del, 1); store.set('alerts', alerts); renderAlerts(); }
+    if (r) {
+      const a = alerts.find(x => x.id === r.dataset.run); if (!a) return;
+      api('alerts?a=checked', { id: a.id }).then(x => { alerts = x.alerts; }).catch(() => {});
+      runSearch(a.q, { q: a.q, min: '', max: a.max, loc: a.loc, sort: 'new' }, 'alert');
+    }
+    if (d) {
+      const id = d.dataset.del;
+      alerts = alerts.filter(x => x.id !== id); renderAlerts();
+      try { alerts = (await api('alerts?a=remove', { id })).alerts; renderAlerts(); } catch (x) { toast(x.error); loadAlerts(); }
+    }
   });
 
   /* ---------- FLIP ---------- */
@@ -869,9 +1287,9 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     const fees = sell > 0 ? Math.round((sell * p.pct / 100 + p.fixed) * 100) / 100 : 0;
     const profit = Math.round((sell - fees - post - other - buy) * 100) / 100;
     const roi = buy > 0 ? Math.round(profit / buy * 100) : 0;
-    const breakeven = p.pct < 100 ? Math.ceil(((buy + post + other + p.fixed) / (1 - p.pct / 100)) * 100) / 100 : 0;
+    const breakeven = Math.ceil(((buy + post + other + p.fixed) / (1 - p.pct / 100)) * 100) / 100;
     const ready = buy > 0 && sell > 0;
-    $('#f-result').innerHTML = `<div class="stat main"><small>${ready ? (profit >= 0 ? 'Your profit' : 'You\'d lose') : 'Your profit'}</small><b class="${ready ? (profit >= 0 ? 'pos' : 'neg') : ''}">${ready ? gbp(Math.abs(profit)) : '£–'}</b></div>
+    $('#f-result').innerHTML = `<div class="stat main"><small>${ready && profit < 0 ? 'You’d lose' : 'Your profit'}</small><b class="${ready ? (profit >= 0 ? 'pos' : 'neg') : ''}">${ready ? gbp(Math.abs(profit)) : '£–'}</b></div>
       <div class="stat"><small>Return</small><b>${ready ? roi + '%' : '–'}</b></div>
       <div class="stat"><small>Fees</small><b>${ready ? gbp(fees) : '–'}</b></div>
       <div class="stat"><small>Break even</small><b>${buy > 0 ? gbp(breakeven) : '–'}</b></div>`;
@@ -880,19 +1298,120 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   ['item', 'buy', 'sell', 'post', 'other'].forEach(k => $('#f-' + k).addEventListener('input', e => { flip[k] = e.target.value; saveFlip(); calcFlip(); }));
   $('#f-plat').addEventListener('click', e => { const b = e.target.closest('[data-plat]'); if (!b) return; flip.plat = b.dataset.plat; saveFlip(); renderFlip(); });
 
+  /* ---------- ADMIN ---------- */
+  let adminUsers = [], adminQ = '', openUserId = '';
+  async function loadAdmin() {
+    if (!session || !session.user.isAdmin) { show('search'); return; }
+    $('#ad-free').setAttribute('aria-checked', String(!!session.user.debugFree));
+    $('#ad-health').innerHTML = '<p class="quiet">Loading…</p>';
+    try {
+      const [h, list] = await Promise.all([api('admin?a=health'), api('admin?a=users&q=' + encodeURIComponent(adminQ))]);
+      renderAdminHealth(h);
+      adminUsers = list.users || [];
+      $('#ad-count').textContent = `${list.total} ${list.total === 1 ? 'user' : 'users'} · ${list.pro} on Pro${adminQ ? ` · showing “${adminQ}”` : ''}`;
+      renderAdminUsers();
+    } catch (e) { $('#ad-health').innerHTML = `<p class="err">${esc(e.error || 'Could not load the admin panel.')}</p>`; }
+  }
+  function renderAdminHealth(h) {
+    const row = (name, on, okText, offText) => `<div class="srow"><div class="grow"><b>${name}</b><span>${esc(on ? okText : offText)}</span></div><span class="state ${on ? 'on' : 'off'}">${on ? 'On' : 'Off'}</span></div>`;
+    $('#ad-health').innerHTML = '<p class="label">Server status</p>'
+      + row('Accounts database', h.db, h.dbKind === 'memory' ? 'Test database (wiped when the server restarts)' : h.dbKind === 'preview' ? 'Preview: saved on this device' : 'Upstash Redis connected', 'Connect Upstash Redis in Vercel')
+      + row('Price checks', h.prices, 'AI price estimates are working', 'Add ANTHROPIC_API_KEY in Vercel')
+      + row('Payments', h.payments, 'Stripe is connected', 'Add your Stripe keys in Vercel');
+    const stat = (label, v, main) => `<div class="stat${main ? ' main' : ''}"><small>${label}</small><b>${Number(v || 0).toLocaleString('en-GB')}</b></div>`;
+    $('#ad-stats').innerHTML = stat('Users', h.users, true) + stat('New today', h.today.signups) + stat('Searches today', h.today.searches) + stat('Checks today', h.today.checks);
+  }
+  function userMeta(x) {
+    const u = x.usage || {};
+    return [proLabel(x), x.role === 'owner' ? 'owner' : x.role === 'admin' ? 'admin' : '', `today ${u.search || 0} searches, ${u.check || 0} checks`].filter(Boolean).join(' · ');
+  }
+  function renderAdminUsers() {
+    const el = $('#ad-users');
+    if (!adminUsers.length) { el.innerHTML = '<li class="empty">No users found.</li>'; return; }
+    el.innerHTML = adminUsers.map(x => `<li><button type="button" class="ur${x.plan === 'pro' ? ' pro' : ''}" data-user="${esc(x.id)}"><span class="avatar" aria-hidden="true">${esc(x.email.charAt(0).toUpperCase())}</span><span class="grow"><b>${esc(x.email)}</b><span>${esc(userMeta(x))}</span></span>${icon('chev')}</button></li>`).join('');
+  }
+  const DONE = { grant_pro: 'Pro given', revoke_pro: 'Pro removed', reset_usage: 'Usage reset', signout: 'Signed out of all devices', reset_password: 'Password reset', make_admin: 'Now an admin', remove_admin: 'No longer an admin' };
+  function openUser(id, temp) {
+    const x = adminUsers.find(u => u.id === id); if (!x) return;
+    openUserId = id;
+    const me = session.user, self = x.id === me.id, iOwner = me.role === 'owner', tOwner = x.role === 'owner';
+    const btn = (act, label, cls) => `<button type="button" class="btn ${cls || 'btn-soft'} btn-wide" data-act="${act}">${label}</button>`;
+    let acts = '';
+    if (!tOwner || iOwner) acts += x.compPro ? btn('revoke_pro', 'Remove free Pro') : btn('grant_pro', 'Give free Pro', 'btn-blue');
+    acts += btn('reset_usage', 'Reset today’s usage');
+    if (!self && (!tOwner || iOwner)) acts += btn('signout', 'Sign out of all devices') + btn('reset_password', 'Reset password');
+    if (iOwner && !tOwner) acts += x.role === 'admin' ? btn('remove_admin', 'Remove admin') : btn('make_admin', 'Make admin');
+    if (!self && !tOwner) acts += `<button type="button" class="link danger" data-act="delete-ask">Delete account</button><div class="panel" id="us-del" hidden><p class="quiet">Delete ${esc(x.email)} for good? This also cancels their subscription.</p>${btn('delete', 'Delete account', 'btn-blue')}</div>`;
+    const u = x.usage || {};
+    const sub = x.subStatus ? { trialing: 'Free trial', active: 'Paying', past_due: 'Payment failed', canceled: 'Cancelled', unpaid: 'Unpaid', incomplete: 'Not finished' }[x.subStatus] || x.subStatus : 'None';
+    $('#user-body').innerHTML = `<div class="grab" aria-hidden="true"></div>
+      <div class="sheet-head"><h2 id="us-title">${esc(x.email)}</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+      <dl class="details">
+        <dt>Plan</dt><dd>${esc(proLabel(x))}</dd>
+        <dt>Role</dt><dd>${esc(x.role === 'owner' ? 'Owner (admin)' : x.role === 'admin' ? 'Admin' : 'User')}${self ? ' · you' : ''}</dd>
+        <dt>Subscription</dt><dd>${esc(sub)}</dd>
+        <dt>Today</dt><dd>${u.search || 0} searches, ${u.check || 0} price checks</dd>
+        <dt>Joined</dt><dd>${esc(dateTxt(x.createdAt))}</dd>
+        <dt>Last seen</dt><dd>${esc(dateTxt(x.lastSeen))}</dd>
+      </dl>
+      ${temp ? `<div class="panel"><p class="label">Temporary password</p><p class="secret" id="us-temp">${esc(temp)}</p><button class="btn btn-soft btn-wide" type="button" data-act="copy">Copy</button><p class="quiet">Send this to them privately. They can change it in Account.</p></div>` : ''}
+      <div class="stack">${acts}</div>
+      <p class="err" id="us-err" hidden></p>`;
+    if (openId !== 'user') openSheet('user');
+  }
+  $('#ad-users').addEventListener('click', e => { const b = e.target.closest('[data-user]'); if (b) openUser(b.dataset.user); });
+  $('#user-body').addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act, id = openUserId;
+    if (act === 'delete-ask') { $('#us-del').hidden = false; b.hidden = true; return; }
+    if (act === 'copy') { copyText($('#us-temp').textContent, b); return; }
+    b.disabled = true;
+    try {
+      const r = await api('admin?a=user', { id, action: act });
+      if (r.deleted) { closeSheet(); toast('Account deleted'); loadAdmin(); return; }
+      const i = adminUsers.findIndex(u => u.id === id); if (i >= 0) adminUsers[i] = r.user;
+      renderAdminUsers(); openUser(id, r.tempPassword); toast(DONE[act] || 'Done');
+      if (id === session.user.id) refreshMe();
+    } catch (x) { const er = $('#us-err'); if (er) { er.textContent = x.error; er.hidden = false; } b.disabled = false; }
+  });
+  $('#ad-refresh').addEventListener('click', loadAdmin);
+  $('#ad-search').addEventListener('submit', e => { e.preventDefault(); adminQ = $('#ad-q').value.trim().toLowerCase(); $('#ad-q').blur(); loadAdmin(); });
+  $('#ad-free').addEventListener('click', async () => {
+    const sw = $('#ad-free'), on = sw.getAttribute('aria-checked') !== 'true';
+    sw.disabled = true;
+    try {
+      await api('admin?a=user', { id: session.user.id, action: 'test_free', on });
+      await refreshMe(); sw.setAttribute('aria-checked', String(on));
+      toast(on ? 'Testing as a free user' : 'Back to admin Pro'); loadAdmin();
+    } catch (e) { toast(e.error); }
+    finally { sw.disabled = false; }
+  });
+  $('#ad-reset-me').addEventListener('click', async () => {
+    try { await api('admin?a=user', { id: session.user.id, action: 'reset_usage' }); await refreshMe(); toast('Your usage is reset'); loadAdmin(); }
+    catch (e) { toast(e.error); }
+  });
+
   /* ---------- mode + first open ---------- */
   function setMode(m) { mode = m; store.set('mode', m); renderHome(); renderResults(); }
   $('#onboard').addEventListener('click', e => {
     const b = e.target.closest('[data-mode]'); if (!b) return;
     setMode(b.dataset.mode); $('#onboard').hidden = true;
-    show(mode === 'flip' ? 'search' : 'search'); setTimeout(() => qEl.focus(), 50);
+    show('search'); setTimeout(() => qEl.focus(), 50);
   });
 
   /* ---------- boot ---------- */
-  qEl.value = state.q;
-  if (!mode) { mode = 'shop'; $('#onboard').hidden = false; }
-  renderHome(); renderCounters(); show('search'); renderResults();
-  if (state.q) loadEstimate();
+  async function boot() {
+    qEl.value = '';
+    renderHome();
+    if (!token) { showAuth(); return; }
+    if (session) enterApp();
+    try { applySession(await api('auth?a=me')); enterApp(); }
+    catch (e) {
+      if (e.status === 401) return;
+      if (!session) showAuth(e.error); else toast(e.error);
+    }
+  }
+  boot();
 })();
 </script>
 

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALL FOR ONE</title>
+<style>
+:root{--bg:#F6F7F9;--surface:#FFFFFF;--ink:#0F1B2D;--muted:#67758A;--line:#E3E7EE;--blue:#1D5BF2;--on-blue:#FFFFFF;--green:#0E9F63;--green-soft:#E2F5EC;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--bg:#0A1019;--surface:#111A26;--ink:#E9EEF5;--muted:#8C99AC;--line:#1E2938;--blue:#5C8DFF;--on-blue:#0A1019;--green:#38CF8C;--green-soft:#10301F;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--ink);font:500 16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.card{max-width:380px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:28px 22px;text-align:center;display:grid;gap:12px}
+.tick{width:56px;height:56px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto;font-size:28px;font-weight:800}
+h1{margin:0;font-size:1.5rem;letter-spacing:-.02em}
+p{margin:0;color:var(--muted)}
+a{display:block;margin-top:6px;background:var(--blue);color:var(--on-blue);text-decoration:none;font-weight:800;border-radius:12px;padding:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="tick" aria-hidden="true">✓</div>
+  <h1 id="t">You’re all set</h1>
+  <p id="m">Go back to the ALL FOR ONE app. Your Pro plan switches on straight away.</p>
+  <a href="/">Open ALL FOR ONE</a>
+</div>
+<script>
+  var q = new URLSearchParams(location.search);
+  if (q.get('done') === '0') { document.getElementById('t').textContent = 'No payment taken'; document.getElementById('m').textContent = 'You can start Pro any time from the app.'; document.querySelector('.tick').textContent = '–'; }
+  if (q.get('portal')) { document.getElementById('t').textContent = 'Subscription updated'; document.getElementById('m').textContent = 'Go back to the ALL FOR ONE app to carry on.'; }
+</script>
+</body>
+</html>
