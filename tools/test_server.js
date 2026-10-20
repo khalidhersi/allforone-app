@@ -50,6 +50,8 @@ global.fetch = async (url, opts = {}) => {
   ok(r.status === 409, 'duplicate email blocked');
   r = await call('auth?a=signup', { email: 'bad', password: 'password123' });
   ok(r.status === 400, 'bad email blocked');
+  r = await call('auth?a=signup', { email: '<img/src=x>@evil.com', password: 'password123' });
+  ok(r.status === 400, 'odd characters in email blocked');
   r = await call('auth?a=signup', { email: 'a@b.co', password: 'short' });
   ok(r.status === 400, 'short password blocked');
 

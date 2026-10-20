@@ -1,5 +1,5 @@
 // ALL FOR ONE: keeps the app shell available offline; everything else goes to the network.
-const CACHE = 'allforone-v4';
+const CACHE = 'allforone-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './fonts/manrope.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

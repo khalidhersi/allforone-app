@@ -23,10 +23,11 @@ module.exports = C.route({
     return C.session(u);
   },
 
-  'POST login': async ({ body }) => {
+  'POST login': async ({ req, body }) => {
     const email = C.normEmail(body.email), pw = String(body.password || '');
     if (!email || !pw) throw C.fail(400, 'Enter your email and password.');
     await C.limitRate('login:' + email, 10, 900);
+    await C.limitRate('loginip:' + C.ip(req), 60, 900);
     const u = await C.userByEmail(email);
     const ok = await C.checkPw(pw, u ? u.pw : C.DUMMY_HASH);
     if (!u || !ok) throw C.fail(401, 'Wrong email or password.');

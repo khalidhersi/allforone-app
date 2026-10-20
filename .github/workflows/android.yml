@@ -54,6 +54,12 @@ jobs:
       - name: Name the file
         run: cp android/app/build/outputs/apk/release/app-release.apk ALL-FOR-ONE.apk
 
+      - name: Check the APK
+        run: bash tools/apk_check.sh
+
+      - name: Check the marketplace links
+        run: bash tools/check_links.sh
+
       - name: Get the previous version to compare
         env:
           GH_TOKEN: ${{ github.token }}

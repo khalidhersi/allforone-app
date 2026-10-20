@@ -24,7 +24,7 @@ img{max-width:100%}
 /* Layout: calm phone-first app. Login first, then four tabs (Search, Check, Alerts, Flip), one job per screen. Admin panel opens from Account. */
 :root{
   /* Colour roles: navy = trust, blue = action, green = money saved, amber = careful, gold = Pro only */
-  --bg:#F6F7F9; --surface:#FFFFFF; --soft:#EEF1F5; --ink:#0F1B2D; --ink-2:#344257; --muted:#67758A; --line:#E3E7EE;
+  --bg:#F6F7F9; --surface:#FFFFFF; --soft:#EEF1F5; --ink:#0F1B2D; --ink-2:#344257; --muted:#5B697D; --line:#E3E7EE;
   --blue:#1D5BF2; --blue-soft:#E8EFFE; --blue-ink:#1645B8; --on-blue:#FFFFFF;
   --green:#0E9F63; --green-soft:#E2F5EC; --green-ink:#076B42;
   --amber:#C26A00; --amber-soft:#FFF0DC; --amber-ink:#7A4300;
@@ -111,7 +111,7 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .err{margin:0;font-size:.85rem;color:var(--ink);background:var(--amber-soft);padding:8px 10px;border-radius:10px}
 .linkbtn{background:none;border:0;color:var(--blue-ink);font:800 .9rem var(--font);cursor:pointer;padding:4px 0;text-align:left}
 .empty{padding:22px 16px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:16px;margin:0}
-.x{border:0;background:var(--soft);color:var(--ink);width:32px;height:32px;border-radius:50%;font-size:1.05rem;line-height:1;cursor:pointer;flex:none}
+.x{border:0;background:var(--soft);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:1.05rem;line-height:1;cursor:pointer;flex:none}
 .note{margin:0;font-size:.82rem;color:var(--ink-2);background:var(--soft);padding:10px 12px;border-radius:12px}
 .grow{min-width:0;flex:1;display:grid}
 .grow b{font-weight:800;font-size:.95rem;overflow-wrap:anywhere}
@@ -563,7 +563,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
 
 <script>
 (() => {
-  const VERSION = '0.6';
+  const VERSION = '0.7';
   /* The live server the Android app talks to. */
   const API_URL = 'https://allforone-app.vercel.app';
 
@@ -880,7 +880,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     const err = `<p class="err" id="pro-err"${msg ? '' : ' hidden'}>${esc(msg || '')}</p>`;
     if (isPro()) {
       body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
-        <div class="pro-head"><h2 id="p-title">You’re on Pro</h2><p>${esc(proLabel(u))}. Unlimited searches, price checks and deal alerts.</p></div>
+        <div class="pro-head"><h2 id="p-title">You’re on Pro</h2><p>${esc(proLabel(u))}. Unlimited searches and price checks, and up to 30 saved alerts.</p></div>
         ${u.hasBilling ? '<button class="btn btn-soft btn-wide" type="button" id="pro-manage">Manage subscription</button>' : ''}
         <button class="btn btn-blue btn-wide" type="button" data-close>Done</button>${err}`;
       return;
@@ -894,10 +894,10 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     const trial = !(u && u.trialUsed);
     body.innerHTML = `<div class="grab" aria-hidden="true"></div><span class="pro-badge">${icon('star')}PRO</span>
       <div class="pro-head"><h2 id="p-title">${esc(h)}</h2><p>${esc(p)}</p></div>
-      <ul class="perks"><li>${tick}Unlimited price checks</li><li>${tick}Unlimited searches</li><li>${tick}Up to 30 deal alerts</li></ul>
+      <ul class="perks"><li>${tick}Unlimited price checks</li><li>${tick}Unlimited searches</li><li>${tick}Save up to 30 deal alerts</li></ul>
       <div class="plans" role="radiogroup" aria-label="Plan">${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="plan" role="radio" data-plan="${k}" aria-checked="${k === plan}"><b>${v.label}</b><span>${v.price}</span>${v.save ? `<em>${v.save}</em>` : ''}</button>`).join('')}</div>
       <button class="btn btn-blue btn-wide" type="button" id="trial-btn">${trial ? 'Start 7-day free trial' : 'Subscribe'}</button>
-      <p class="demo">${trial ? `Free for 7 days, then ${PLANS[plan].price}. Card needed. Cancel before day 8 and you won’t pay.` : `${PLANS[plan].price}. Cancel any time.`}${PREVIEW ? '<br>Preview: no payment is taken.' : ''}</p>
+      <p class="demo">${trial ? `Free for 7 days, then ${PLANS[plan].price}. Card needed. Cancel before day 8 and you won’t pay.` : `${PLANS[plan].price}. Cancel any time.`}<br>Fair use applies. Alert notifications are coming soon.${PREVIEW ? '<br>Preview: no payment is taken.' : ''}</p>
       ${err}
       <button class="link" type="button" data-close>Not now</button>`;
   }
@@ -1194,7 +1194,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     if (!e) head = `<div class="verdict"><span class="vpill v-none">Checking…</span><span class="shim" style="width:160px;height:28px;color:var(--ink)"></span></div>`;
     else if (e.typical) {
       const v = verdictFor(price, e.typical);
-      head = `<div class="verdict"><span class="vpill ${v.cls}">${v.label}</span><span class="big">${esc(gbp(price))}</span><p>Usually ${esc(rangeTxt(e.typical))} used${url ? ' · ' + esc(siteOf(url)) : ''}. ${esc(v.line)}</p>${acts}</div>`;
+      head = `<div class="verdict"><span class="vpill ${v.cls}">${v.label}</span><span class="big">${esc(gbp(price))}</span><p>Usually about ${esc(rangeTxt(e.typical))} used (estimate)${url ? ' · ' + esc(siteOf(url)) : ''}. ${esc(v.line)}</p><p class="quiet">Estimates come from typical prices, not live listings. Check sold prices before you pay.</p>${acts}</div>`;
     } else if (e.vague) head = `<div class="verdict"><span class="vpill v-none">Need more detail</span><p>Add the model, size or storage (like "iPhone 13 128GB") for a verdict.</p>${acts}</div>`;
     else head = `<div class="verdict"><span class="vpill v-none">Verdicts switching on soon</span><p>Instant verdicts aren’t live yet. For now, compare with what it actually sold for.</p>${acts}</div>`;
     $('#verdict').innerHTML = head + (e ? flags : '');
@@ -1404,6 +1404,20 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     setMode(b.dataset.mode); $('#onboard').hidden = true;
     show('search'); setTimeout(() => qEl.focus(), 50);
   });
+
+  /* ---------- Android back button ---------- */
+  // Without this, Android's back button quits the app even when a menu is open.
+  const AppPlugin = isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (AppPlugin && AppPlugin.addListener) {
+    AppPlugin.addListener('backButton', () => {
+      if (openId) { closeSheet(); return; }
+      if ($('#auth').hidden && $('#onboard').hidden) {
+        if (tab !== 'search') { show('search'); return; }
+        if (state.q) { state.q = ''; qEl.value = ''; persist(); renderResults(); return; }
+      }
+      if (AppPlugin.minimizeApp) AppPlugin.minimizeApp(); else if (AppPlugin.exitApp) AppPlugin.exitApp();
+    });
+  }
 
   /* ---------- boot ---------- */
   async function boot() {
