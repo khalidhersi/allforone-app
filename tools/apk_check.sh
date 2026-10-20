@@ -14,7 +14,7 @@ BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
   "$BT/aapt2" dump badging ALL-FOR-ONE.apk > badging.txt 2>/dev/null
   echo "- $(grep -oE "versionCode='[0-9]+'|versionName='[^']+'" badging.txt | tr '\n' ' ')"
   echo "- Works on Android $(grep -oE "minSdkVersion:'[0-9]+'" badging.txt | grep -oE '[0-9]+') (SDK) and newer"
-  echo "- Permissions: $(grep -oE "uses-permission: name='[^']+'" badging.txt | sed -E "s/.*android.permission.//; s/'//" | tr '\n' ' ')"
+  echo "- Permissions: $(grep -oE "uses-permission: name='android.permission.[A-Z_]+'" badging.txt | sed -E "s/.*android.permission.//; s/'//" | tr '\n' ' ')"
   echo ""
 } > "$REPORT"
 cat "$REPORT"

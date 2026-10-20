@@ -98,4 +98,5 @@ jobs:
             ALL-FOR-ONE.apk
             smoke-report.txt
             smoke-screen.png
+            smoke-logcat.txt
           make_latest: true

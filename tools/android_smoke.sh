@@ -50,12 +50,21 @@ status=$?
 echo "$update_note" >> "$REPORT"
 
 # Back button on the first screen should tuck the app away, not crash it
-adb shell input keyevent 4; sleep 3
-resumed=$(adb shell dumpsys activity activities | tr -d '\r' | grep -m1 -E "mResumedActivity|topResumedActivity")
-if [ -n "$(adb shell pidof $PKG | tr -d '\r')" ] && ! echo "$resumed" | grep -q "$PKG"; then
+adb logcat -c
+adb shell input keyevent 4; sleep 4
+adb logcat -d > smoke-logcat.txt
+resumed=$(adb shell dumpsys activity activities | tr -d '\r' | grep -m1 -E "topResumedActivity|mResumedActivity")
+alive=$(adb shell pidof $PKG | tr -d '\r')
+if grep -qE "FATAL EXCEPTION" smoke-logcat.txt; then
+  echo "- Back button on the first screen: CRASHED" >> "$REPORT"
+  grep -A12 "FATAL EXCEPTION" smoke-logcat.txt | head -14 >> "$REPORT"
+elif echo "$resumed" | grep -q "$PKG"; then
+  echo "- Back button on the first screen: app stayed open (not expected)" >> "$REPORT"
+elif [ -n "$alive" ]; then
   echo "- Back button on the first screen: puts the app in the background (no crash)" >> "$REPORT"
 else
-  echo "- Back button on the first screen: unexpected (${resumed:-no info})" >> "$REPORT"
+  echo "- Back button on the first screen: app closed without a crash" >> "$REPORT"
+  grep -iE "allforone" smoke-logcat.txt | grep -iE "died|kill|finish|exit|remove" | head -5 >> "$REPORT"
 fi
 adb shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1; sleep 3
 adb exec-out screencap -p > smoke-screen.png

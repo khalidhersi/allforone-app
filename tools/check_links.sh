@@ -8,7 +8,8 @@ check() {
   code=$(curl -sL -m 20 -A "$UA" -H 'Accept-Language: en-GB' -o page.html -w '%{http_code}' "$url" || echo 000)
   if grep -qi "$word" page.html 2>/dev/null; then hit="mentions \"$word\""; else hit="no mention of \"$word\""; fi
   case "$code" in
-    200) echo "- $name: opens (200), $hit" ;;
+    200) title=$(tr '\n' ' ' < page.html | grep -oiE '<title[^>]*>[^<]{0,90}' | head -1 | sed -E 's/<title[^>]*>//I; s/&amp;/\&/g; s/ +/ /g')
+         echo "- $name: opens (200), $hit, page title: \"${title:-none}\"" ;;
     403|429|503) echo "- $name: blocks automatic checks ($code), check by hand" ;;
     *) echo "- $name: returned $code, check by hand" ;;
   esac
