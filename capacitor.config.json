@@ -2,7 +2,9 @@
   "appId": "com.allforone.app",
   "appName": "ALL FOR ONE",
   "webDir": "www",
+  "loggingBehavior": "none",
   "android": {
-    "backgroundColor": "#F6F7F9"
+    "backgroundColor": "#F6F7F9",
+    "webContentsDebuggingEnabled": false
   }
 }

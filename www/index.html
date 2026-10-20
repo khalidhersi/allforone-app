@@ -8,7 +8,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:"Manrope";font-style:normal;font-weight:200 800;font-display:swap;src:url(fonts/manrope.woff2) format("woff2")}
 :root{color-scheme:light;padding-top:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));padding-bottom:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
 body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 img{max-width:100%}
@@ -18,9 +20,6 @@ img{max-width:100%}
 <body>
 <title>ALL FOR ONE</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <style>
 /* Layout: calm phone-first app. Login first, then four tabs (Search, Check, Alerts, Flip), one job per screen. Admin panel opens from Account. */
 :root{
@@ -134,7 +133,8 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .typical a svg.i{width:15px;height:15px}
 .typical.plain{background:var(--soft);color:var(--ink-2)}
 .typical.plain a{color:var(--ink)}
-.shim{display:block;height:22px;width:120px;margin-top:3px;border-radius:7px;background:linear-gradient(90deg,color-mix(in srgb,currentColor 10%,transparent),color-mix(in srgb,currentColor 20%,transparent),color-mix(in srgb,currentColor 10%,transparent));background-size:200% 100%}
+/* loading placeholders are static on purpose: an endless animation keeps the phone redrawing and drains the battery */
+.shim{display:block;height:22px;width:120px;margin-top:3px;border-radius:7px;background:color-mix(in srgb,currentColor 14%,transparent)}
 .rows{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .rs{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-top:1px solid var(--line)}
 .rs:first-child{border-top:0}
@@ -147,7 +147,7 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .rs-price b{font-weight:800;font-size:.98rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .rs-price small{font-size:.68rem;font-weight:700;color:var(--muted)}
 .rs.top .rs-price b{color:var(--green)}
-.rs-price i{display:block;width:54px;height:14px;border-radius:5px;background:linear-gradient(90deg,var(--soft),var(--line),var(--soft));background-size:200% 100%}
+.rs-price i{display:block;width:54px;height:14px;border-radius:5px;background:var(--line)}
 .open{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--blue-soft);color:var(--blue-ink);border-radius:11px;padding:10px 12px;font:800 .88rem var(--font);text-decoration:none;white-space:nowrap}
 .open svg.i{width:15px;height:15px}
 .rs.top .open{background:var(--blue);color:var(--on-blue)}
@@ -264,8 +264,6 @@ h1.q{font:800 clamp(1.7rem,7.5vw,2.4rem)/1.12 var(--font);letter-spacing:-.035em
 .toast{position:fixed;left:50%;bottom:calc(84px + max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:800;font-size:.88rem;z-index:70;max-width:calc(100% - 32px);text-align:center}
 
 @media (prefers-reduced-motion:no-preference){
-  .shim,.rs-price i{animation:sh 1.4s linear infinite}
-  @keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
   .sheet{animation:up .2s ease-out}
   @keyframes up{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}
   .switch,.switch::after{transition:background-color .15s,transform .15s}
@@ -680,19 +678,23 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
       try { return await mockApi(path, body); }
       catch (e) { if (e.status === 401 && token && !authCall) loggedOut('Please log in again.'); throw e; }
     }
-    let r;
+    // Give up after 15 seconds so a bad connection never leaves the app waiting (and the radio awake) forever.
+    const ctl = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; ctl.abort(); }, 15000);
+    if (signal) { if (signal.aborted) ctl.abort(); else signal.addEventListener('abort', () => ctl.abort(), { once: true }); }
+    let r, data = {};
     try {
       r = await fetch(serverBase() + '/api/' + path, {
-        method: body ? 'POST' : 'GET', signal,
+        method: body ? 'POST' : 'GET', signal: ctl.signal,
         headers: Object.assign({ 'content-type': 'application/json' }, token ? { authorization: 'Bearer ' + token } : {}),
         body: body ? JSON.stringify(body) : undefined,
       });
+      try { data = await r.json(); } catch (e) { if (ctl.signal.aborted) throw e; }
     } catch (e) {
-      if (e && e.name === 'AbortError') throw e;
-      throw { status: 0, error: 'Can’t reach ALL FOR ONE. Check your internet and try again.' };
-    }
-    let data = {};
-    try { data = await r.json(); } catch (e) {}
+      if (signal && signal.aborted) throw Object.assign(new Error('Cancelled'), { name: 'AbortError' });
+      throw { status: 0, error: timedOut ? 'ALL FOR ONE is taking too long to answer. Try again.' : 'Can’t reach ALL FOR ONE. Check your internet and try again.' };
+    } finally { clearTimeout(timer); }
     if (!r.ok) {
       const err = Object.assign({}, data, { status: r.status, error: data.error || 'Something went wrong. Try again.' });
       if (r.status === 401 && token && !authCall) loggedOut('You were logged out. Please log in again.');
@@ -930,8 +932,12 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     refreshMe();
     return true;
   }
+  // Re-check the account when the app comes back, at most once a minute (always while waiting for a payment).
+  let lastRefresh = Date.now();
   document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState !== 'visible' || !token) return;
+    if (!awaitingPay && Date.now() - lastRefresh < 60000) return;
+    lastRefresh = Date.now();
     const wasPro = isPro();
     await refreshMe();
     if (!wasPro && isPro()) { closeSheet(); awaitingPay = false; toast('You’re on Pro'); runPending(); }

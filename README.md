@@ -11,7 +11,9 @@ Never overpay. Never miss a deal.
 
 ## Get the Android app
 
-Every push to `main` builds a fresh APK. Open this repo's **Releases** page, download `ALL-FOR-ONE.apk` on your phone and install it.
+Every push to `main` builds an optimised release APK, tests it on an Android 14 emulator (start time, idle CPU, memory, crashes) and only then publishes it. Open this repo's **Releases** page, download `ALL-FOR-ONE.apk` on your phone and install it. Each release note shows the before/after measurements.
+
+New versions install over the old one (same signing key, higher version number).
 
 ## Put the server live (Vercel)
 
@@ -53,5 +55,5 @@ The app expects the server at `https://allforone-app.vercel.app`. If Vercel give
 
 ## Notes
 
-- APKs here are test builds (debug-signed). The Play Store needs a signed release build, and Google requires its own billing for subscriptions sold inside Play Store apps.
+- APKs are signed with the test key in `android/keystore` (see the README there). For the Play Store, turn on Play App Signing. Google also requires its own billing for subscriptions sold inside Play Store apps.
 - Vercel's free Hobby plan is for non-commercial use. Move to Vercel Pro once you start charging.
