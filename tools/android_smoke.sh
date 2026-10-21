@@ -49,24 +49,39 @@ measure ALL-FOR-ONE.apk "This build"
 status=$?
 echo "$update_note" >> "$REPORT"
 
-# Back button on the first screen should tuck the app away, not crash it
-adb logcat -c
-adb shell input keyevent 4; sleep 4
-adb logcat -d > smoke-logcat.txt
-resumed=$(adb shell dumpsys activity activities | tr -d '\r' | grep -m1 -E "topResumedActivity|mResumedActivity")
-alive=$(adb shell pidof $PKG | tr -d '\r')
-if grep -qE "FATAL EXCEPTION" smoke-logcat.txt; then
-  echo "- Back button on the first screen: CRASHED" >> "$REPORT"
-  grep -A12 "FATAL EXCEPTION" smoke-logcat.txt | head -14 >> "$REPORT"
-elif echo "$resumed" | grep -q "$PKG"; then
-  echo "- Back button on the first screen: app stayed open (not expected)" >> "$REPORT"
-elif [ -n "$alive" ]; then
-  echo "- Back button on the first screen: puts the app in the background (no crash)" >> "$REPORT"
-else
-  echo "- Back button on the first screen: app closed without a crash" >> "$REPORT"
-  grep -iE "allforone" smoke-logcat.txt | grep -iE "died|kill|finish|exit|remove" | head -5 >> "$REPORT"
-fi
-adb shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1; sleep 3
+# Stability: none of these should ever crash the app
+crashed() { grep -qE "FATAL EXCEPTION|>>> $PKG <<<|crashpad_client" "$1"; }
+renderer_pid() { adb shell ps -A -o PID,NAME | tr -d '\r' | awk '/sandboxed_process/ {print $1; exit}'; }
+on_top() { adb shell dumpsys activity activities | tr -d '\r' | grep -m1 -E "topResumedActivity|mResumedActivity" | grep -q "$PKG"; }
+adb root >/dev/null 2>&1 || true; adb wait-for-device; sleep 3
+crashes_found=0
+
+# A: Android stops the web view while the app is open
+adb shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1; sleep 8
+adb logcat -c; rp=$(renderer_pid)
+if [ -n "$rp" ]; then
+  adb shell kill -9 "$rp"; sleep 10; adb logcat -d > logcat-a.txt
+  if crashed logcat-a.txt; then echo "- Web view stopped while open: CRASHED" >> "$REPORT"; crashes_found=1
+  elif on_top && [ -n "$(renderer_pid)" ]; then echo "- Web view stopped while open: app recovers by itself, no crash" >> "$REPORT"
+  else echo "- Web view stopped while open: no crash, but the app didn't come back" >> "$REPORT"; fi
+else echo "- Web view stopped while open: couldn't find the web view process to test" >> "$REPORT"; : > logcat-a.txt; fi
+
+# B: back button on the first screen
+adb logcat -c; adb shell input keyevent 4; sleep 5; adb logcat -d > logcat-b.txt
+if crashed logcat-b.txt; then echo "- Back button: CRASHED" >> "$REPORT"; crashes_found=1
+elif on_top; then echo "- Back button: app stayed open (not expected)" >> "$REPORT"
+else echo "- Back button: tucks the app away, no crash" >> "$REPORT"; fi
+
+# C: Android stops the web view while the app is in the background, then the person comes back
+adb shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1; sleep 8
+adb shell input keyevent 3; sleep 3
+adb logcat -c; rp=$(renderer_pid); [ -n "$rp" ] && adb shell kill -9 "$rp"; sleep 6
+adb shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1; sleep 8; adb logcat -d > logcat-c.txt
+if crashed logcat-c.txt; then echo "- Web view stopped in the background: CRASHED" >> "$REPORT"; crashes_found=1
+elif on_top; then echo "- Web view stopped in the background: no crash, reopens normally" >> "$REPORT"
+else echo "- Web view stopped in the background: no crash, but didn't reopen" >> "$REPORT"; fi
+cat logcat-a.txt logcat-b.txt logcat-c.txt > smoke-logcat.txt
+[ "$crashes_found" = "0" ] || status=1
 adb exec-out screencap -p > smoke-screen.png
 echo "" >> "$REPORT"
 echo "Idle CPU is measured over 30 seconds on the first screen." >> "$REPORT"
