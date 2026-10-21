@@ -4,6 +4,7 @@ Each GitHub build is a release (`build-N`) with its test report. Newest first.
 
 | Build | Date | What changed |
 | --- | --- | --- |
+| 10 | 21 Oct 2026 | No app changes. Added the app source, test scripts and these Project files to the repo. Docs-only changes no longer trigger a build. |
 | 9 | 21 Oct 2026 | No more crash when Android stops the web view (on back, in the background or while open). Emulator stability tests added. |
 | 8 | 20 Oct 2026 | Extra build checks: crash log after the back button, page titles in the link check. |
 | 7 | 20 Oct 2026 | Audit fixes: back button handled, phone backups off, honest paywall wording, verdicts labelled as estimates, stricter email check, per-network login limit, safe payment return link, better contrast and bigger buttons. APK signature, update-over-old and link checks added to every build. |
