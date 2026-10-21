@@ -45,12 +45,16 @@ The app expects the server at `https://allforone-app.vercel.app`. If Vercel give
 
 ## Where things live
 
-- `www/index.html` – the app (built by `tools/build_www.py` from the app page)
+- `src/app.html` – **the app's source: edit this one**
+- `www/index.html` – built from it: `python3 tools/build_www.py src/app.html`, then `npx cap sync android`
 - `www/paid.html` – the page people see after paying
 - `api/` – server functions: `auth`, `estimate`, `alerts`, `billing`, `stripe` (webhook), `admin`
 - `lib/core.js` – shared server code: database, passwords, sessions, limits, Stripe
 - `tools/dev_server.js` – run everything locally with a test database: `node tools/dev_server.js`
 - `tools/test_server.js` – server tests: `node tools/test_server.js`
+- `tools/e2e_test.py` – app click-through on a simulated phone: `python3 tools/e2e_test.py`
+- `tools/perf_test.py` – how hard the app works while idle
+- `docs/project/` – the Claude Project files (instructions, context, technical reference, decisions, status, marketing, changelog)
 - `.github/workflows/android.yml` – builds the APK on GitHub
 
 ## Notes
