@@ -53,6 +53,7 @@ img{max-width:100%}
 }
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
+.no-accounts #pro-btn,.no-accounts #acct-btn{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font:500 16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));z-index:30;background:var(--bg)}
@@ -563,9 +564,12 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
 
 <script>
 (() => {
-  const VERSION = '0.7';
+  const VERSION = '0.8';
   /* The live server the Android app talks to. */
   const API_URL = 'https://allforone-app.vercel.app';
+  /* Accounts and the paywall. false = no login: everyone gets everything, saved on the phone only.
+     Set to true (and put the server live) when you're ready to sell. */
+  const ACCOUNTS_ON = false;
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
@@ -666,6 +670,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     return '';
   }
   const PREVIEW = serverBase() === null;
+  const LOCAL = PREVIEW || !ACCOUNTS_ON;
   let token = store.get('token', '');
   let session = store.get('session', null);
   const saveSession = () => store.set('session', session);
@@ -674,7 +679,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
 
   async function api(path, body, signal) {
     const authCall = /^auth\?a=(login|signup)/.test(path);
-    if (PREVIEW) {
+    if (LOCAL) {
       try { return await mockApi(path, body); }
       catch (e) { if (e.status === 401 && token && !authCall) loggedOut('Please log in again.'); throw e; }
     }
@@ -742,7 +747,7 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
     const d = store.get('mock', { users: {}, me: '' });
     const day = new Date().toISOString().slice(0, 10);
     const no = (status, error, extra) => { throw Object.assign({ status, error }, extra || {}); };
-    const pro = u => !u.debugFree && (u.role === 'owner' || !!u.compPro);
+    const pro = u => !ACCOUNTS_ON || (!u.debugFree && (u.role === 'owner' || !!u.compPro));
     const pub = u => ({ id: u.email, email: u.email, plan: pro(u) ? 'pro' : 'free', proSource: u.debugFree ? 'testing' : u.role === 'owner' ? 'admin' : u.compPro ? 'gift' : null, isAdmin: u.role === 'owner', role: u.role, trialUsed: false, hasBilling: false, debugFree: !!u.debugFree, createdAt: u.createdAt });
     const lim = u => pro(u) ? { search: 300, check: 150, alerts: 30 } : { search: 3, check: 3, alerts: 1 };
     const use = u => (u.usage && u.usage.day === day) ? u.usage : (u.usage = { day, search: 0, check: 0 });
@@ -1423,6 +1428,17 @@ button,a,.tab,.pill,.ex,.open,.plan,.choice{touch-action:manipulation;-webkit-us
   async function boot() {
     qEl.value = '';
     renderHome();
+    if (!ACCOUNTS_ON) {
+      // No login for now: a private account that lives only on this phone, with everything unlocked.
+      document.documentElement.classList.add('no-accounts');
+      const d = store.get('mock', { users: {}, me: '' }), id = 'you@this-phone';
+      if (!d.users[id]) d.users[id] = { email: id, role: 'user', createdAt: Date.now(), alerts: [] };
+      d.me = id; store.set('mock', d);
+      token = 'local'; store.set('token', token);
+      try { applySession(await api('auth?a=me')); } catch (e) {}
+      enterApp();
+      return;
+    }
     if (!token) { showAuth(); return; }
     if (session) enterApp();
     try { applySession(await api('auth?a=me')); enterApp(); }

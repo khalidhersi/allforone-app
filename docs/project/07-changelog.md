@@ -4,6 +4,7 @@ Each GitHub build is a release (`build-N`) with its test report. Newest first.
 
 | Build | Date | What changed |
 | --- | --- | --- |
+| 11 | 22 Oct 2026 | Version 0.8. Login and paywall switched off for now (`ACCOUNTS_ON = false` in `src/app.html`). The app opens straight in, everything unlocked, alerts saved on the phone. Price estimates are off until the server is live. |
 | 10 | 21 Oct 2026 | No app changes. Added the app source, test scripts and these Project files to the repo. Docs-only changes no longer trigger a build. |
 | 9 | 21 Oct 2026 | No more crash when Android stops the web view (on back, in the background or while open). Emulator stability tests added. |
 | 8 | 20 Oct 2026 | Extra build checks: crash log after the back button, page titles in the link check. |

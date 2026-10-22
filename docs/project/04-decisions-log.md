@@ -23,3 +23,4 @@ Newest at the bottom. Add a line whenever something is decided, with the reason.
 | 20 Oct 2026 | Paywall wording: alerts "coming soon", fair use noted; verdicts say "estimate" | Honesty: no notifications or live prices yet |
 | 21 Oct 2026 | Handle the web view process stopping (restart or close, never crash) | The audit found a crash on back/background |
 | 21 Oct 2026 | App source in `src/app.html` plus Project files in `docs/project/` | Keeps future chats accurate |
+- **22 Oct 2026: login and paywall switched off for now.** Khalid isn't ready to sell yet. One switch (`ACCOUNTS_ON` in `src/app.html`) turns them back on. All the server, Stripe and admin code stays in place.

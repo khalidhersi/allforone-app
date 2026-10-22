@@ -1,10 +1,11 @@
 # ALL FOR ONE: Status and roadmap
 
-Last updated: 21 October 2026
+Last updated: 22 October 2026
 
 ## Where things stand
-- **App:** build 9, version 0.7. Passes 57 server checks, 40 phone checks and every emulator test.
-- **Blocker:** the server isn't live, so nobody can log in yet.
+- **App:** build 11, version 0.8.
+- **Login is switched off** (22 Oct, Khalid's choice) until he's ready to sell. The app opens straight in with everything unlocked. Alerts are saved on the phone only. No price estimates without the server.
+- **To sell:** set `ACCOUNTS_ON = true` in `src/app.html`, put the server live, then rebuild.
 - **Khalid's phone:** the app wouldn't install. Most likely the old test build is still installed and needs uninstalling once.
 
 ## Needs Khalid (in this order)
